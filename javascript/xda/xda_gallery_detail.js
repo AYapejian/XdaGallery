@@ -24,7 +24,7 @@ function XdaGalleryThread(){
     this.currentPage = 1;
     this.lastPage = 1;
     this.minImagesToLoad = 10;
-    this.currentImageSet = null;
+    this.currentImageSet = [];
     this.isLoading = false;
     this.isLoadingAdditionalPages = false;
 }
@@ -36,32 +36,30 @@ XdaGalleryThread.prototype.setXdaTopic = function (xdaTopic) {
     this.currentPage = xdaTopic.topicPage;
 
     this.setupGalleryHeader();
-}
+};
 
 // Set the Gallery Detail header to contain relevant information
 XdaGalleryThread.prototype.setupGalleryHeader = function (xdaTopic) {
 
     var xdaTopic = xdaTopic || this.currentXdaThread;
 
-    // TODO: Extract topic title from url and use in Anchor
-    xdaTopic.title = "Click to open original thread in new tab";
     var html = "<a target='_blank' href='" + xdaTopic.url + "' >" + xdaTopic.title + "</a>";
     $("#topicName").html(html);
-}
+};
 
 // Refresh the current gallery page
 XdaGalleryThread.prototype.refresh = function () {
     this.renderImagesForTopic("1797072", this.currentPage);
     renderImagesForTopic(this.currentXdaThread.topicId, this.currentPage);
-}
+};
 
 // Next Gallery Page
 XdaGalleryThread.prototype.nextPage = function () {
-    if(this.currentPage < this.lastPage){
+    if(this.currentPage < this.currentXdaThread.lastPage){
         this.currentPage++;
         this.renderImagesForTopic(this.currentXdaThread.topicId, this.currentPage);
     }
-}
+};
 
 // Previous Gallery Page
 XdaGalleryThread.prototype.previousPage = function () {
@@ -69,65 +67,9 @@ XdaGalleryThread.prototype.previousPage = function () {
         this.currentPage--;
         this.renderImagesForTopic(this.currentXdaThread.topicId, this.currentPage);
     }
-}
+};
 
-// Fetches the first page of topic and looks for the anchor with rel="last" attribute
-// then kicks off the start of image fetching; we need to know the last page prior to
-// fetching
-XdaGalleryThread.prototype.getThreadMaxPages = function (url, callback) {
-    console.log("Detecting max pages for thread at: " + url);
-
-    var that = this;
-    $.ajax({
-        url: url,
-
-        success: function(data){
-
-            data = that.cleanHtml(data);
-
-            var urlSearchParamForPage = "page=";
-            var lastPage;
-
-            // First see if the lastpage is defined in a "Last Page" anchor
-            var lastPageAnchor = $(data).find(".pagenavControls a[rel='last']");
-            if(lastPageAnchor.length > 0 ){
-                var url = lastPageAnchor[0].href;
-                lastPage = url.substr(url.indexOf(urlSearchParamForPage) + urlSearchParamForPage.length);
-            // If not then look in the other tag
-            }else{
-                var pageControls = $(data).find(".pagenavControls td span small strong");
-                if(pageControls && pageControls[1]){
-                    lastPage = pageControls[1].innerText;
-                }
-            }
-
-            if(lastPage){
-                lastPage = $.trim(lastPage);
-
-                // If we found a page number then set; otherwise display error
-                if(!isNaN(lastPage)){
-                    console.log("Last Page found in topic: " + lastPage);
-
-                    that.lastPage = lastPage;
-                    callback(true);
-                }else{
-                    that.displayError("Error finding last page of topic, cannot continue");
-                    callback(false);
-                }
-            }else{
-                that.displayError("Couldn't find last page");
-            }
-        },
-
-        error: function(data){
-            console.log("Error getting max pages for url: " + url);
-            that.setLoadingIndicator(false);
-        }
-
-    });
-}
-
-    // Show or hide loading indicator.  Only show if we're loading the first page.
+// Show or hide loading indicator.  Only show if we're loading the first page.
 XdaGalleryThread.prototype.setLoadingIndicator = function (isLoading) {
     if(isLoading && !this.isLoadingAdditionalPages){
         isLoading = true;
@@ -141,7 +83,7 @@ XdaGalleryThread.prototype.setLoadingIndicator = function (isLoading) {
         isLoading = false;
         $("#loaderIndicator").hide();
     }
-}
+};
 
  XdaGalleryThread.prototype.renderImagesForTopic = function (topicId, pageNum) {
     console.log("Fetching images for topic id " + topicId + " and page number " + pageNum);
@@ -158,13 +100,12 @@ XdaGalleryThread.prototype.setLoadingIndicator = function (isLoading) {
     // Strip the html doc of script and style tags; and convert img src to data-src attribute
     data = this.cleanHtml(data);
 
-
     var images = this.getAllImages(data);
     console.log("Found " + images.length + " images on page " + pageNum);
 
     // Will be null on first initiations of fetching more images
-    // reset to null again after hitting out min images or last page
-    if(this.currentImageSet == null){
+    // reset to null again after hitting our min images or last page
+    if(this.currentImageSet.length == 0){
         this.currentImageSet = images;
     }else{
         $.merge(this.currentImageSet, images);
@@ -172,7 +113,7 @@ XdaGalleryThread.prototype.setLoadingIndicator = function (isLoading) {
 
     // Logic to keep fetching pages until minimum number of
     // images are loaded or we've hit last page
-    if(this.currentImageSet.length < this.minImagesToLoad && this.currentPage < this.lastPage){
+    if(this.currentImageSet.length < this.minImagesToLoad && this.currentPage < this.currentXdaThread.lastPage){
         console.log("Currently fetched " + this.currentImageSet.length + " images; looking for more on next page");
 
         this.nextPage();
@@ -187,14 +128,15 @@ XdaGalleryThread.prototype.setLoadingIndicator = function (isLoading) {
             this.setLoadingIndicator(false);
 
             var html = this.generateHtml(this.currentImageSet);
-            this.currentImageSet = null;
+            this.currentImageSet = [];
 
             $("#xdaGalleryContent").append(html);
             $('#xdaGalleryContent').imagesLoaded(this.imagesDoneLoading());
         }
     }
-}
+};
 
+// This generates the html surrounding each image to be injected when fetching new images
 XdaGalleryThread.prototype.generateHtml = function (images) {
     var html = "";
     var length = images.length;
@@ -205,7 +147,7 @@ XdaGalleryThread.prototype.generateHtml = function (images) {
 
         // Need to force width and height since we don't know
         // them yet ( imageLoaded jquery plugin doesn't seem to
-        // fire correctly
+        // fire correctly )
         imageHtml += " width='300' height='400' />";
 
         imageHtml += "<div class='postInfo'>";
@@ -218,7 +160,8 @@ XdaGalleryThread.prototype.generateHtml = function (images) {
     }
 
     return html;
-}
+};
+
 
 XdaGalleryThread.prototype.imagesDoneLoading = function () {
       // Prepare layout options.
@@ -236,9 +179,9 @@ XdaGalleryThread.prototype.imagesDoneLoading = function () {
 
       // Handle any stuff we want to do for clicking the li
       handler.click(function(){
-
+        // TODO: Put in handler to display full size on click
       });
-}
+};
 
 // jQuery will use the browser to parse html; which causes resources to be loaded in the background
 // here we strip out script and style tags; then we change img 'src' to 'data-src' to stop from
@@ -252,7 +195,7 @@ XdaGalleryThread.prototype.cleanHtml = function (html) {
 
     htmlDocStripped = htmlDocStripped.replace(/<img([^>]*)\ssrc=/gi, '<img$1 data-src=');
     return htmlDocStripped;
-}
+};
 
 XdaGalleryThread.prototype.getAllImages = function (htmlDoc) {
     var xdaImages = [];
@@ -302,12 +245,12 @@ XdaGalleryThread.prototype.getAllImages = function (htmlDoc) {
                     src: imageSrc,
                     hasThumbnail: hasThumbnail,
                     thumbnailSrc: thumbnailSrc
-            }
+            };
             xdaImages.push(image);
         }
     }
     return xdaImages;
-}
+};
 
 // Validates a given image tag for things like emoticons and
 // signiture images
@@ -325,7 +268,7 @@ XdaGalleryThread.prototype.isValidImage = function (imageTag) {
     }
 
     return validImage;
-}
+};
 
 XdaGalleryThread.prototype.onScroll = function (event) {
     if(!this.isLoading){
@@ -335,24 +278,23 @@ XdaGalleryThread.prototype.onScroll = function (event) {
             this.nextPage();
         }
     }
-}
+};
 
 XdaGalleryThread.prototype.displayError = function (errorMessage) {
     this.setLoadingIndicator(false);
     $("#debugDetails span").html(errorMessage);
     $("#debugInfo").show();
-}
+};
 
 XdaGalleryThread.prototype.hideError = function () {
         $("#debugInfo").hide();
-}
+};
 
 
 // Get the current tab of this gallery; and request the xda gallery info from
 // the XDA tab that this was opened from
 XdaGalleryThread.prototype.fetchXdaTopicFromExtensionBackground = function () {
     var that = this;
-
     chrome.tabs.query({active: true, currentWindow: true},
         function(tabs){
 
@@ -378,22 +320,13 @@ XdaGalleryThread.prototype.fetchXdaTopicFromExtensionBackground = function () {
             }
         }
     );
-}
+};
 
 XdaGalleryThread.prototype.initGallery = function (xdaTopic) {
 
     this.setXdaTopic(xdaTopic);
-
-    var that = this;
-    // If we find a last page in topic ( always should ) then start fetching images
-    this.getThreadMaxPages(xdaTopic.url,
-        function(success){
-            if(success){
-                that.renderImagesForTopic(that.currentXdaThread.topicId, that.currentPage);
-            }
-        }
-    );
-}
+    this.renderImagesForTopic(this.currentXdaThread.topicId, this.currentPage);
+};
 
 
 // ************************************************************************************************

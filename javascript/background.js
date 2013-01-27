@@ -17,15 +17,19 @@ var xdaUtils = new XdaUtils();
 
 chrome.extension.onMessage.addListener(
 		function(request, sender, sendResponse) {
-
 			if (request.method == "getXdaTopic"){
 				console.log("Received Message From Gallery Detail: " + request.method);
 				console.log("For tabId " + request.tabId);
 
 				chrome.tabs.get(request.tabId,
 					function(tab){
-						var xdaTopic = xdaUtils.getTopicFromUrl(tab.url);
-						sendResponse({xdaTopic: xdaTopic})
+						xdaUtils.getTopicFromUrl(tab.url, function(xdaTopic){
+							if(xdaTopic){
+								sendResponse({xdaTopic: xdaTopic});
+							}else{
+								sendResponse({xdaTopic: null});
+							}
+						});
 					}
 				);
 
