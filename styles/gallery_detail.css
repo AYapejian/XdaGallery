@@ -1,0 +1,89 @@
+
+/**
+ * Grid container
+ */
+#xdaGalleryContent {
+	list-style-type: 	none;
+	position: 			relative; /** Needed to ensure items are laid out relative to this container **/
+	margin: 			0;
+}
+
+/**
+ * Grid items
+ */
+#xdaGalleryContent li {
+
+	background-color: 		#ffffff;
+	border: 1px solid 		#dedede;
+	-moz-border-radius: 	2px;
+	-webkit-border-radius: 	2px;
+	border-radius: 			2px;
+	display: 				none; /** Hide items initially to avoid a flicker effect **/
+	cursor: 				pointer;
+	padding: 				4px;
+}
+
+#xdaGalleryContent li img {
+	display: 		block;
+}
+
+/**
+ * Grid item text
+ */
+#xdaGalleryContent li p {
+	color: 	 		#666;
+	font-size: 		12px;
+	margin: 		7px 0 0 7px;
+}
+
+/** Info & Loader **/
+#info{
+	position: 	absolute;
+	width: 		300px;
+	height: 	50px;
+}
+
+#loaderIndicator {
+	position: 			relative;
+	background-color: 	transparent;
+	display: 			none;
+	width: 				100px;
+	height: 			100px;
+	margin: 			0 auto;
+	background-image: 	url('/images/loader.gif');
+}
+
+#tools{
+	display: 		none;
+	height: 		40px;
+	margin: 		10px auto 10px auto;
+}
+
+#refresh{
+	width: 			35px;
+	height: 		35px;
+	background: 	url('/images/refresh.jpg') no-repeat;
+}
+
+#debugInfo{
+	display:			none;
+	position:			absolute;
+	top:				0;
+	width: 				80%;
+	height:				50px;
+
+	margin:				0 10%;
+	padding:			10px;
+
+    color: 				white;
+    font-size: 			1.1em;
+    text-align: 		center;
+	background-color: 	black;
+    opacity: 			.5;
+
+}
+
+#debugDetails{
+	width:		100%;
+	height:		50px;
+}

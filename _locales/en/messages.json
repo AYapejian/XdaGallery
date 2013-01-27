@@ -1,0 +1,11 @@
+{
+	"extName":  {
+    	"message": "XDA Gallery",
+    	"description": "Chrome extension name."
+  	},
+  	"extDescription": {
+    	"message": "View all images in XDA threads.",
+    	"description": "Chrome extension description."
+  	}
+}
+  

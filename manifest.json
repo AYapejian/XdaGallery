@@ -1,0 +1,31 @@
+{
+  "name": "__MSG_extName__",
+  "version": "0.1",
+  "manifest_version": 2,
+  "description": "__MSG_extDescription__",
+  "default_locale": "en",
+
+  "browser_action": {
+    "default_icon": "images/icon.png"
+  },
+
+  "background": { "page": "views/background.html" },
+  
+  "permissions": [
+    "tabs", "http://forum.xda-developers.com/*"
+  ],
+  
+  "content_security_policy": "script-src 'self' https://ssl.google-analytics.com; object-src 'self'",
+  
+   "content_scripts": [
+    {
+      "matches": ["http://forum.xda-developers.com/*"],
+      "js": [
+      		"javascript/jquery.js", 
+	      	"javascript/background.js", 
+    	  	"javascript/xda/xda_utils.js",
+      		"javascript/xda/xda_gallery_detail.js"
+      	]
+    }
+  ]
+}
