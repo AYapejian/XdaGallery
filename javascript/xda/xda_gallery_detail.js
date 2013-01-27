@@ -105,7 +105,7 @@ XdaGalleryThread.prototype.setLoadingIndicator = function (isLoading) {
 
     // Will be null on first initiations of fetching more images
     // reset to null again after hitting our min images or last page
-    if(this.currentImageSet.length == 0){
+    if(this.currentImageSet.length === 0){
         this.currentImageSet = images;
     }else{
         $.merge(this.currentImageSet, images);
@@ -117,11 +117,16 @@ XdaGalleryThread.prototype.setLoadingIndicator = function (isLoading) {
         console.log("Currently fetched " + this.currentImageSet.length + " images; looking for more on next page");
 
         this.nextPage();
+
+    // We've reached the last page
+    } else if(this.currentPage > this.currentXdaThread.lastPage){
+        this.showThreadEndIndicator(true);
     } else {
         // Recursion will cause this to get executed for all additional pages; so we set this to only
         // allow the method that comes here to set this to false since we're done; and block other
         // recursions from entering( Don't like this; should look again later )
         if(this.isLoadingAdditionalPages){
+
             console.log("*** Done fetching this batch. Loading " + this.currentImageSet.length + " images ***");
             this.isLoadingAdditionalPages = false;
 
@@ -132,6 +137,11 @@ XdaGalleryThread.prototype.setLoadingIndicator = function (isLoading) {
 
             $("#xdaGalleryContent").append(html);
             $('#xdaGalleryContent').imagesLoaded(this.imagesDoneLoading());
+            // If we got here and have less images then our current minimum then there are not more
+            // pages on the thread to fetch
+            if(this.currentImageSet.length < this.minImagesToLoad){
+                this.showThreadEndIndicator(true);
+            }
         }
     }
 };
@@ -162,6 +172,15 @@ XdaGalleryThread.prototype.generateHtml = function (images) {
     return html;
 };
 
+// Append a thread ending indicator to the page
+XdaGalleryThread.prototype.showThreadEndIndicator = function (showIndicator) {
+    this.setLoadingIndicator(false);
+    if(showIndicator){
+        $("#threadEndingIndicator").show();
+    }else{
+        $("#threadEndingIndicator").hide();
+    }
+};
 
 XdaGalleryThread.prototype.imagesDoneLoading = function () {
       // Prepare layout options.
