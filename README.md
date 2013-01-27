@@ -14,10 +14,11 @@ XDA threads seem to open with this format, almost always, when browsing the foru
 
 Broswing either of these urls will give you an example of the expected format, and a working gallery page by clicking the extension button:
 
+(NOTE: Not responsible for the content in the posts, they were pretty much a random search to find them)
 ```
-http://forum.xda-developers.com/showthread.php?t=1633561&highlight=homescreen
+http://forum.xda-developers.com/showthread.php?t=1633561
 
-http://forum.xda-developers.com/showthread.php?t=1633561&highlight=homescreen
+http://forum.xda-developers.com/showthread.php?t=1990251
 ```
 
 ##Known Issues:
