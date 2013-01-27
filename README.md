@@ -1,4 +1,32 @@
-XdaGallery
+#XdaGallery - Alpha Build
 ==========
 
+##Description
 Chrome Extension to view XDA forum threads as an image gallery
+
+This only works, and button is only enabled, on XDA topic urls which follow the format:
+
+`http://forum.xda-developers.com/showthread.php?t=<SOME TOPIC ID>`
+
+XDA threads seem to open with this format, almost always, when browsing the forum normally.  Sometimes if you arrive at a topic url via google, or it's a very old topic the url format will be different and that extension button will stay disabled, this is by design to eliminate any errors parsing the page for images.
+
+##Examples URLs:
+
+Broswing either of these urls will give you an example of the expected format, and a working gallery page by clicking the extension button:
+
+```
+http://forum.xda-developers.com/showthread.php?t=1633561&highlight=homescreen
+
+http://forum.xda-developers.com/showthread.php?t=1633561&highlight=homescreen
+```
+
+##Known Issues:
+
+* Sometimes gallery page will fail to load
+  * Close tab and retry, if it still fails, then it must be a bug
+* Browser freezes for a second while loading new images
+  * Known issue, doing synchronized loading now to get around layout issues, need to fix this
+* Forum title doesn't show on gallery page
+  * Known issue, just need to implement that parsing for this
+* The gallery page is ugly as hell!
+  * Very known issue, see "Alpha" title above, working on functionality first :op
