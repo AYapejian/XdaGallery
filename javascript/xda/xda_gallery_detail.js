@@ -71,6 +71,7 @@ XdaGalleryThread.prototype.previousPage = function () {
 
 // Show or hide loading indicator.  Only show if we're loading the first page.
 XdaGalleryThread.prototype.setLoadingIndicator = function (isLoading) {
+
     if(isLoading && !this.isLoadingAdditionalPages){
         isLoading = true;
 
@@ -79,7 +80,7 @@ XdaGalleryThread.prototype.setLoadingIndicator = function (isLoading) {
         loaderDiv.css("top", Math.max(0, (($(window).height() - loaderDiv.outerHeight()) / 2) + $(window).scrollTop()) + "px");
         loaderDiv.css("left", Math.max(0, (($(window).width() - loaderDiv.outerWidth()) / 2) +  $(window).scrollLeft()) + "px");
         loaderDiv.show();
-    }else{
+    }else if(!isLoading){
         isLoading = false;
         $("#loaderIndicator").hide();
     }
@@ -126,10 +127,15 @@ XdaGalleryThread.prototype.setLoadingIndicator = function (isLoading) {
         // allow the method that comes here to set this to false since we're done; and block other
         // recursions from entering( Don't like this; should look again later )
         if(this.isLoadingAdditionalPages){
-
             console.log("*** Done fetching this batch. Loading " + this.currentImageSet.length + " images ***");
-            this.isLoadingAdditionalPages = false;
 
+            // If we got here and have less images then our current minimum then there are not more
+            // pages on the thread to fetch
+            if(this.currentImageSet.length < this.minImagesToLoad){
+                this.showThreadEndIndicator(true);
+            }
+
+            this.isLoadingAdditionalPages = false;
             this.setLoadingIndicator(false);
 
             var html = this.generateHtml(this.currentImageSet);
@@ -137,11 +143,6 @@ XdaGalleryThread.prototype.setLoadingIndicator = function (isLoading) {
 
             $("#xdaGalleryContent").append(html);
             $('#xdaGalleryContent').imagesLoaded(this.imagesDoneLoading());
-            // If we got here and have less images then our current minimum then there are not more
-            // pages on the thread to fetch
-            if(this.currentImageSet.length < this.minImagesToLoad){
-                this.showThreadEndIndicator(true);
-            }
         }
     }
 };
@@ -301,12 +302,16 @@ XdaGalleryThread.prototype.onScroll = function (event) {
 
 XdaGalleryThread.prototype.displayError = function (errorMessage) {
     this.setLoadingIndicator(false);
+    console.error(errorMessage);
     $("#debugDetails span").html(errorMessage);
-    $("#debugInfo").show();
+    $("#debugDetails").addClass("error");
+    $("#debugInfo").slideDown();
 };
 
 XdaGalleryThread.prototype.hideError = function () {
-        $("#debugInfo").hide();
+    $("#debugInfo").slideUp(function(){
+        $("#debugDetails").removeClass("error");
+    });
 };
 
 
@@ -364,7 +369,6 @@ $(document).ready(function(){
     // If we're debugging fetch and load the xdaTopic from the background js from
     // extension, otherwise load a test page
     if(!xdaGalleryThread.debug){
-        xdaGalleryThread.setLoadingIndicator(true);
         xdaGalleryThread.fetchXdaTopicFromExtensionBackground();
     }else{
         xdaGalleryThread.displayError("Testing Error");
