@@ -23,7 +23,7 @@ function XdaGalleryThread(){
     this.currentXdaThread = null;
     this.currentPage = 1;
     this.lastPage = 1;
-    this.minImagesToLoad = 10;
+    this.minImagesToLoad = 12;
     this.currentImageSet = [];
     this.isLoading = false;
     this.isLoadingAdditionalPages = false;
@@ -73,7 +73,7 @@ XdaGalleryThread.prototype.previousPage = function () {
 XdaGalleryThread.prototype.setLoadingIndicator = function (isLoading) {
 
     if(isLoading && !this.isLoadingAdditionalPages){
-        isLoading = true;
+        this.isLoading = true;
 
         var loaderDiv = $("#loaderIndicator");
         loaderDiv.css("position", "absolute");
@@ -81,12 +81,17 @@ XdaGalleryThread.prototype.setLoadingIndicator = function (isLoading) {
         loaderDiv.css("left", Math.max(0, (($(window).width() - loaderDiv.outerWidth()) / 2) +  $(window).scrollLeft()) + "px");
         loaderDiv.show();
     }else if(!isLoading){
-        isLoading = false;
+        this.isLoading = false;
         $("#loaderIndicator").hide();
     }
 };
 
- XdaGalleryThread.prototype.renderImagesForTopic = function (topicId, pageNum) {
+// Kicks off the collection of images starting at the given page number,
+// stops when we have reached our minium number of images or have reached
+// the last page.  Will also load all images on a page regardless of minimum,
+// for instance, if our minimum num images is 10 and the first page had 5 images
+// and next page had 15 images, 20 images will be loaded to ensure we get them all
+XdaGalleryThread.prototype.renderImagesForTopic = function (topicId, pageNum) {
     console.log("Fetching images for topic id " + topicId + " and page number " + pageNum);
 
     var url = this.currentXdaThread.url;
@@ -95,8 +100,14 @@ XdaGalleryThread.prototype.setLoadingIndicator = function (isLoading) {
     this.setLoadingIndicator(true);
     this.isLoadingAdditionalPages = true;
 
+    var that = this;
     // Fetch the HTML doc for parsing
-    var data = $.ajax({url: url, async: false}).responseText;
+    $.ajax({url: url, async: true}).done(function(data){
+        that.renderImagesForTopic_Complete(data, pageNum);
+    });
+};
+
+XdaGalleryThread.prototype.renderImagesForTopic_Complete = function (data, pageNum) {
 
     // Strip the html doc of script and style tags; and convert img src to data-src attribute
     data = this.cleanHtml(data);
