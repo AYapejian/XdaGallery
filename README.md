@@ -25,9 +25,5 @@ http://forum.xda-developers.com/showthread.php?t=1990251
 
 * Sometimes gallery page will fail to load
   * Close tab and retry, if it still fails, then it must be a bug
-* Browser freezes for a second while loading new images
-  * Known issue, doing synchronized loading now to get around layout issues, need to fix this
-* Forum title doesn't show on gallery page
-  * Known issue, just need to implement that parsing for this
 * The gallery page is ugly as hell!
   * Very known issue, see "Alpha" title above, working on functionality first :op
