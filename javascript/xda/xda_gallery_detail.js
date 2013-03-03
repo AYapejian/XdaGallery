@@ -173,7 +173,7 @@ XdaGalleryThread.prototype.generateHtml = function (images) {
         imageHtml += " width='300' height='400' />";
 
         imageHtml += "<div class='postInfo'>";
-        imageHtml += "  <a id='postLink' target='_blank' href='" + images[x].postLink + "'>View Post</a>";
+        imageHtml += "  <a id='postLink' target='_blank' href='" + images[x].postLink + "'>View Post</a> -- ";
         imageHtml += "  <a id='topicPageLink' target='_blank' href='" + this.currentXdaThread.url + "&page=" + images[x].topicPage + "'>Page " + images[x].topicPage + "</a>";
         imageHtml += "</div>";
         imageHtml += "</li>";

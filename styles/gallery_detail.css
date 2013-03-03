@@ -1,3 +1,24 @@
+html {
+	background-image: url('/images/gallery-background.png');
+}
+
+a, a:ACTIVE{
+	color: 			#AAA;
+}
+
+a:VISITED{
+	color:			#888;
+}
+
+a:HOVER{
+	text-decoration: underline;
+}
+
+header h1{
+	color: 				#AAA;
+}
+
+
 
 /**
  * Grid container
@@ -13,18 +34,21 @@
  */
 #xdaGalleryContent li {
 
-	background-color: 		#ffffff;
-	border: 1px solid 		#dedede;
-	-moz-border-radius: 	2px;
-	-webkit-border-radius: 	2px;
-	border-radius: 			2px;
+	background-color: 		#444444;
+	-moz-border-radius: 	3px;
+	-webkit-border-radius: 	3px;
+	border-radius: 			3px;
 	display: 				none; /** Hide items initially to avoid a flicker effect **/
 	cursor: 				pointer;
-	padding: 				4px;
+	padding: 				5px;
 }
 
 #xdaGalleryContent li img {
 	display: 		block;
+}
+
+.postInfo {
+	text-align:		center;
 }
 
 /**

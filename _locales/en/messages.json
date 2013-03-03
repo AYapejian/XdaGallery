@@ -1,10 +1,10 @@
 {
 	"extName":  {
-    	"message": "XDA Gallery",
+    	"message": "XDA Gallery - BETA",
     	"description": "Chrome extension name."
   	},
   	"extDescription": {
-    	"message": "View all images in XDA threads.",
+    	"message": "View all images in XDA threads. This is a beta improvements and fixes coming in the future.",
     	"description": "Chrome extension description."
   	}
 }
