@@ -24,23 +24,55 @@ header h1{
  * Grid container
  */
 #xdaGalleryContent {
-	list-style-type: 	none;
-	position: 			relative; /** Needed to ensure items are laid out relative to this container **/
-	margin: 			0;
+	margin: 			2px;
+	padding: 			0;
+	list-style: 		none;
 }
 
 /**
  * Grid items
  */
 #xdaGalleryContent li {
-
+	position: 				relative;
+	float: 					left;
+	
+	margin: 				2px 0 3px 5px;
+	padding: 				5px;
+	
+	list-style-type: 		none;
 	background-color: 		#444444;
 	-moz-border-radius: 	3px;
 	-webkit-border-radius: 	3px;
 	border-radius: 			3px;
-	display: 				none; /** Hide items initially to avoid a flicker effect **/
+	
 	cursor: 				pointer;
-	padding: 				5px;
+}
+
+#xdaGalleryContent li img{
+	height:					400px;
+	width:					300px;	
+}
+
+#xdaGalleryContent li span{
+	position: absolute;
+	display: block;
+	bottom: 0;
+	right: 0;
+	top: 0;
+	left: 0;
+	z-index: 2;
+	background-repeat: no-repeat;
+	background-position: center center;
+	background-color: #222;
+}
+
+#xdaGalleryContent li span.image-loading{
+	background-color:		orange;
+}
+
+#xdaGalleryContent li span.image-broken{
+	display:				none;
+	background-color:		red;
 }
 
 #xdaGalleryContent li img {

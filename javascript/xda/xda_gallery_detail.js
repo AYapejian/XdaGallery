@@ -1,7 +1,6 @@
 /*
  * Author: Ara Yapejian
- * Credits: Credit to Wookmark and imageLoaded plugin for gallery detail page
- *      Wookmark: https://github.com/GBKS/Wookmark-jQuery
+ * Credits: Credit to imageLoaded plugin for gallery detail page
  *      ImagesLoaded: https://github.com/desandro/imagesloaded
  */
 var _gaq = _gaq || [];
@@ -27,6 +26,9 @@ function XdaGalleryThread(){
     this.currentImageSet = [];
     this.isLoading = false;
     this.isLoadingAdditionalPages = false;
+    
+    // HTML Elements
+    this.$imageContainer = null;
 }
 
 
@@ -108,7 +110,8 @@ XdaGalleryThread.prototype.renderImagesForTopic = function (topicId, pageNum) {
 };
 
 XdaGalleryThread.prototype.renderImagesForTopic_Complete = function (data, pageNum) {
-
+	var that = this;
+	
     // Strip the html doc of script and style tags; and convert img src to data-src attribute
     data = this.cleanHtml(data);
 
@@ -152,11 +155,35 @@ XdaGalleryThread.prototype.renderImagesForTopic_Complete = function (data, pageN
             var html = this.generateHtml(this.currentImageSet);
             this.currentImageSet = [];
 
-            $("#xdaGalleryContent").append(html);
-            $('#xdaGalleryContent').imagesLoaded(this.imagesDoneLoading());
+           this.$imageContainer.append(html);
+           this.watchImageProgress();
         }
     }
 };
+
+XdaGalleryThread.prototype.watchImageProgress = function () {
+	var dfd = this.$imageContainer.imagesLoaded({
+		callback: function($images, $proper, $broken){
+			console.log("Callback...");
+		},
+		progress: function (isBroken, $images, $proper, $broken) {
+			var $loadingSpan = this.siblings('.image-loading');
+			
+			// TODO: Either change to not show broken images, or 
+			// add a better graphic to show broken
+			if(isBroken){
+				this.siblings('.image-broken').show();
+			}
+			
+			$loadingSpan.fadeOut();
+		}
+	});
+	
+	dfd.done(function($images){
+		console.log("Done...");
+	});
+};
+
 
 // This generates the html surrounding each image to be injected when fetching new images
 XdaGalleryThread.prototype.generateHtml = function (images) {
@@ -168,14 +195,15 @@ XdaGalleryThread.prototype.generateHtml = function (images) {
         imageHtml += "<img src='" + images[x].src + "' ";
 
         // Need to force width and height since we don't know
-        // them yet ( imageLoaded jquery plugin doesn't seem to
-        // fire correctly )
-        imageHtml += " width='300' height='400' />";
+        // them yet 
+        // TODO: Change this and add logic in watchImageProgress()
+        imageHtml += " />";
 
         imageHtml += "<div class='postInfo'>";
         imageHtml += "  <a id='postLink' target='_blank' href='" + images[x].postLink + "'>View Post</a> -- ";
         imageHtml += "  <a id='topicPageLink' target='_blank' href='" + this.currentXdaThread.url + "&page=" + images[x].topicPage + "'>Page " + images[x].topicPage + "</a>";
         imageHtml += "</div>";
+        imageHtml += "<span class='image-loading'></span><span class='image-broken'>";
         imageHtml += "</li>";
 
         html += imageHtml;
@@ -192,26 +220,6 @@ XdaGalleryThread.prototype.showThreadEndIndicator = function (showIndicator) {
     }else{
         $("#threadEndingIndicator").hide();
     }
-};
-
-XdaGalleryThread.prototype.imagesDoneLoading = function () {
-      // Prepare layout options.
-      var options = {
-        autoResize: true, // This will auto-update the layout when the browser window is resized.
-        container: $('#main'),
-        offset: 2 // Optional; the distance between grid items
-      };
-
-      // Get a reference to your grid items.
-      var handler = $('#xdaGalleryContent').find('li');
-
-      // Call the layout function.
-      handler.wookmark(options);
-
-      // Handle any stuff we want to do for clicking the li
-      handler.click(function(){
-        // TODO: Put in handler to display full size on click
-      });
 };
 
 // jQuery will use the browser to parse html; which causes resources to be loaded in the background
@@ -358,7 +366,7 @@ XdaGalleryThread.prototype.fetchXdaTopicFromExtensionBackground = function () {
 };
 
 XdaGalleryThread.prototype.initGallery = function (xdaTopic) {
-
+	this.$imageContainer = $("#xdaGalleryContent");
     this.setXdaTopic(xdaTopic);
     this.renderImagesForTopic(this.currentXdaThread.topicId, this.currentPage);
 };
