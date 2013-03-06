@@ -18,78 +18,68 @@ header h1{
 	color: 				#AAA;
 }
 
-
-
 /**
  * Grid container
  */
 #xdaGalleryContent {
 	margin: 			2px;
 	padding: 			0;
-	list-style: 		none;
+	list-style-type:	none;
 }
 
 /**
  * Grid items
  */
-#xdaGalleryContent li {
-	position: 				relative;
+.item {
+	position:				relative;
 	float: 					left;
-	
-	margin: 				2px 0 3px 5px;
+	width:					220px;
+	margin:					5px;	
 	padding: 				5px;
 	
-	list-style-type: 		none;
 	background-color: 		#444444;
-	-moz-border-radius: 	3px;
-	-webkit-border-radius: 	3px;
-	border-radius: 			3px;
+}
+
+.item img{
+	width:					100%;
+}
+
+.item .postInfo{
+	position:				absolute;
+	display:				none;
+	bottom:					0;
+	left:					0;
+	right:					0;
+	height:					20px;
 	
-	cursor: 				pointer;
+	background:				rgba(0, 0, 0, 0.7);
+	text-align:				center;
 }
 
-#xdaGalleryContent li img{
-	height:					400px;
-	width:					300px;	
+.item-hover .postInfo{
+	display:				block;
 }
 
-#xdaGalleryContent li span{
-	position: absolute;
-	display: block;
-	bottom: 0;
-	right: 0;
-	top: 0;
-	left: 0;
-	z-index: 2;
-	background-repeat: no-repeat;
-	background-position: center center;
-	background-color: #222;
+.item span{
+	position: 				absolute;
+	display: 				block;
+	bottom: 				0;
+	right: 					0;
+	top: 					0;
+	left: 					0;
+	z-index: 				2;
+	background-repeat: 		no-repeat;
+	background-position: 	center center;
 }
 
-#xdaGalleryContent li span.image-loading{
+.item .image-loading{
+	display:				none;
 	background-color:		orange;
 }
 
-#xdaGalleryContent li span.image-broken{
+.item .image-broken{
 	display:				none;
 	background-color:		red;
-}
-
-#xdaGalleryContent li img {
-	display: 		block;
-}
-
-.postInfo {
-	text-align:		center;
-}
-
-/**
- * Grid item text
- */
-#xdaGalleryContent li p {
-	color: 	 		#666;
-	font-size: 		12px;
-	margin: 		7px 0 0 7px;
 }
 
 /** Thread end indicator **/

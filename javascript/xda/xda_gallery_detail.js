@@ -22,13 +22,14 @@ function XdaGalleryThread(){
     this.currentXdaThread = null;
     this.currentPage = 1;
     this.lastPage = 1;
-    this.minImagesToLoad = 12;
+    this.minImagesToLoad = 15;
     this.currentImageSet = [];
     this.isLoading = false;
     this.isLoadingAdditionalPages = false;
     
     // HTML Elements
     this.$imageContainer = null;
+    this.isMasonryInitialized = false;
 }
 
 
@@ -155,32 +156,48 @@ XdaGalleryThread.prototype.renderImagesForTopic_Complete = function (data, pageN
             var html = this.generateHtml(this.currentImageSet);
             this.currentImageSet = [];
 
-           this.$imageContainer.append(html);
-           this.watchImageProgress();
+            var $html = $(html);
+            this.$imageContainer.append($html);
+           
+           this.watchImageProgress($html);
         }
     }
 };
 
-XdaGalleryThread.prototype.watchImageProgress = function () {
+XdaGalleryThread.prototype.watchImageProgress = function ($html) {
+	var that = this;
+	var $myHtml = $html;
+	
 	var dfd = this.$imageContainer.imagesLoaded({
 		callback: function($images, $proper, $broken){
-			console.log("Callback...");
-		},
-		progress: function (isBroken, $images, $proper, $broken) {
-			var $loadingSpan = this.siblings('.image-loading');
 			
-			// TODO: Either change to not show broken images, or 
-			// add a better graphic to show broken
-			if(isBroken){
-				this.siblings('.image-broken').show();
+			if(that.isMasonryInitialized){
+				console.log("Aligning images");
+				that.$imageContainer.masonry('appended', $myHtml, true);
+			}else{
+				console.log("Initializing Alignment");
+				that.$imageContainer.masonry({
+					item: 			'.item',
+					isFitWidth:		true,
+					columnWidth:	function( containerWidth ) {
+					    return containerWidth / 5;
+					}
+				});
+				that.isMasonryInitialized = true;
 			}
 			
-			$loadingSpan.fadeOut();
+			console.log("Fully done with this batch. Properly loaded " + $proper.length + " of " + $images.length + " images. (" + $broken.length + " broken image(s))");
+		},
+		
+		progress: function (isBroken, $images, $proper, $broken) {
+			if(isBroken){
+				this.siblings(".image-broken").show();
+			}
 		}
 	});
 	
 	dfd.done(function($images){
-		console.log("Done...");
+		
 	});
 };
 
@@ -190,7 +207,7 @@ XdaGalleryThread.prototype.generateHtml = function (images) {
     var html = "";
     var length = images.length;
     for(var x = 0; x < length; x++){
-        var imageHtml = "<li>";
+        var imageHtml = "<li class='item'>";
 
         imageHtml += "<img src='" + images[x].src + "' ";
 
@@ -368,9 +385,30 @@ XdaGalleryThread.prototype.fetchXdaTopicFromExtensionBackground = function () {
 XdaGalleryThread.prototype.initGallery = function (xdaTopic) {
 	this.$imageContainer = $("#xdaGalleryContent");
     this.setXdaTopic(xdaTopic);
+    this.setupImageEventBindings();
     this.renderImagesForTopic(this.currentXdaThread.topicId, this.currentPage);
 };
 
+// Set the mouseenter, exit and click handlers for images
+XdaGalleryThread.prototype.setupImageEventBindings = function () {
+	console.log("Binding events");
+	
+	this.$imageContainer.on('click', '.item', function( event ) {
+        $image = $(this).find('img'); 
+        
+        if($image){
+        	window.open($image.attr('src'),'_newtab');
+        }
+        
+    });
+
+	this.$imageContainer.on('mouseenter', '.item', function( event ) {
+		$(this).addClass('item-hover');
+	}).on('mouseleave', '.item', function( event ) {
+		$(this).removeClass('item-hover');
+	});
+	
+};
 
 // ************************************************************************************************
 // Event bindings and entry point for fetching the xdaTopic from the extension for the tab that
