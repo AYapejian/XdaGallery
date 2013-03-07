@@ -22,6 +22,8 @@ function XdaGalleryThread(){
     this.currentXdaThread = null;
     this.currentPage = 1;
     this.lastPage = 1;
+
+    this.numberOfBatchFetchRequest = 1;
     this.minImagesToLoad = 15;
     this.currentImageSet = [];
     this.isLoading = false;
@@ -95,7 +97,7 @@ XdaGalleryThread.prototype.setLoadingIndicator = function (isLoading) {
 // for instance, if our minimum num images is 10 and the first page had 5 images
 // and next page had 15 images, 20 images will be loaded to ensure we get them all
 XdaGalleryThread.prototype.renderImagesForTopic = function (topicId, pageNum) {
-    console.log("Fetching images for topic id " + topicId + " and page number " + pageNum);
+    this.log("Fetching images for topic id " + topicId + " and page number " + pageNum, "INFO");
 
     var url = this.currentXdaThread.url;
     url += "&page=" + pageNum;
@@ -117,7 +119,7 @@ XdaGalleryThread.prototype.renderImagesForTopic_Complete = function (data, pageN
     data = this.cleanHtml(data);
 
     var images = this.getAllImages(data);
-    console.log("Found " + images.length + " images on page " + pageNum);
+    that.log("Found " + images.length + " images on page " + pageNum, "DEBUG");
 
     // Will be null on first initiations of fetching more images
     // reset to null again after hitting our min images or last page
@@ -130,7 +132,7 @@ XdaGalleryThread.prototype.renderImagesForTopic_Complete = function (data, pageN
     // Logic to keep fetching pages until minimum number of
     // images are loaded or we've hit last page
     if(this.currentImageSet.length < this.minImagesToLoad && this.currentPage < this.currentXdaThread.lastPage){
-        console.log("Currently fetched " + this.currentImageSet.length + " images; looking for more on next page");
+        that.log("Currently fetched " + this.currentImageSet.length + " images; looking for more on next page.", "DEBUG");
 
         this.nextPage();
 
@@ -142,7 +144,7 @@ XdaGalleryThread.prototype.renderImagesForTopic_Complete = function (data, pageN
         // allow the method that comes here to set this to false since we're done; and block other
         // recursions from entering( Don't like this; should look again later )
         if(this.isLoadingAdditionalPages){
-            console.log("*** Done fetching this batch. Loading " + this.currentImageSet.length + " images ***");
+            that.log("*** Done fetching this batch. Loading " + this.currentImageSet.length + " images ***", "INFO");
 
             // If we got here and have less images then our current minimum then there are not more
             // pages on the thread to fetch
@@ -172,10 +174,8 @@ XdaGalleryThread.prototype.watchImageProgress = function ($html) {
 		callback: function($images, $proper, $broken){
 
 			if(that.isMasonryInitialized){
-				console.log("Aligning images");
 				that.$imageContainer.masonry('appended', $myHtml, true);
 			}else{
-				console.log("Initializing Alignment");
 				that.$imageContainer.masonry({
                     item:    '.item',
 					isFitWidth:		true,
@@ -186,7 +186,7 @@ XdaGalleryThread.prototype.watchImageProgress = function ($html) {
 				that.isMasonryInitialized = true;
 			}
 
-			console.log("Fully done with this batch. Properly loaded " + $proper.length + " of " + $images.length + " images. (" + $broken.length + " broken image(s))");
+			that.log("Fully done with this batch. Properly loaded " + $proper.length + " of " + $images.length + " images. (" + $broken.length + " broken image(s))", "DEBUG");
 		},
 
 		progress: function (isBroken, $images, $proper, $broken) {
@@ -328,17 +328,67 @@ XdaGalleryThread.prototype.isValidImage = function (imageTag) {
 
 XdaGalleryThread.prototype.onScroll = function (event) {
     if(!this.isLoading){
+
         var closeToBottom = ($(window).scrollTop() + $(window).height() > $(document).height() - 300);
+
         if(closeToBottom) {
-            _gaq.push(['_trackEvent', "Fetch Images - Scroll", 'clicked']);
-            this.nextPage();
+
+            var currentXdaThread = this.currentXdaThread;
+
+            if(currentXdaThread){
+                if(this.currentPage < this.currentXdaThread.lastPage){
+                    var topicName = currentXdaThread.title || "XDA Thread Unknown";
+                    this.log("*** Fetching new batch of images starting on page " + this.currentPage + 1 + " (Batch Request #" + (this.numberOfBatchFetchRequest + 1) + ")", "INFO");
+                    this.trackEvent("Fetch Images", "Number of requests this session: " + this.numberOfBatchFetchRequest++);
+                    this.nextPage();
+                }
+            }
         }
+    }
+};
+
+XdaGalleryThread.prototype.trackEvent = function (category, action, label) {
+    if(category && action){
+        if(label){
+            this.log("Tracking Event: Category: " + category + "; Action: " + action + "; Label: " + label, "DEBUG");
+            _gaq.push(['_trackEvent', category, action, label]);
+        }else{
+            this.log("Tracking Event: Category: " + category + "; Action: " + action, "DEBUG");
+            _gaq.push(['_trackEvent', category, action]);
+        }
+    }else{
+        this.log("Can't track event. Category or action is null", "ERROR");
+    }
+};
+
+/**
+ * Logs a message baseed on severity
+ * @param  {[STRING]} message  Message to log
+ * @param  {[STRING]} severity ERROR, WARN, INFO, DEBUG or null ( null defaults to console.log)
+ */
+XdaGalleryThread.prototype.log = function (message, severity) {
+    if(severity){
+        if(severity == "ERROR"){
+            console.error(message);
+        }else if(severity == "WARN"){
+            console.warn(message);
+        }else if(severity == "INFO"){
+            console.info(message);
+        }else if(severity == "DEBUG"){
+            if(this.debug){
+                console.debug(message);
+            }
+        }else{
+            console.log(message);
+        }
+    }else{
+        console.log(message);
     }
 };
 
 XdaGalleryThread.prototype.displayError = function (errorMessage) {
     this.setLoadingIndicator(false);
-    console.error(errorMessage);
+    this.log(errorMessage, "ERROR");
     $("#debugDetails span").html(errorMessage);
     $("#debugDetails").addClass("error");
     $("#debugInfo").slideDown();
@@ -366,7 +416,7 @@ XdaGalleryThread.prototype.fetchXdaTopicFromExtensionBackground = function () {
                     },
                     function(response){
                         if(response.xdaTopic){
-                            console.log("Received XDA Topic from extension");
+                            that.log("Received XDA Topic from extension", "DEBUG");
 
                             that.initGallery(response.xdaTopic);
 
@@ -383,15 +433,18 @@ XdaGalleryThread.prototype.fetchXdaTopicFromExtensionBackground = function () {
 };
 
 XdaGalleryThread.prototype.initGallery = function (xdaTopic) {
+    this.trackEvent("Gallery Tab Opened", xdaTopic.title, xdaTopic.url);
+
 	this.$imageContainer = $("#xdaGalleryContent");
     this.setXdaTopic(xdaTopic);
     this.setupImageEventBindings();
+
+    this.log("*** Fetching new batch of images starting on page " + this.currentPage + "(Batch Request #" + this.numberOfBatchFetchRequest + ")", "INFO");
     this.renderImagesForTopic(this.currentXdaThread.topicId, this.currentPage);
 };
 
 // Set the mouseenter, exit and click handlers for images
 XdaGalleryThread.prototype.setupImageEventBindings = function () {
-	console.log("Binding events");
 
 	this.$imageContainer.on('click', '.item', function( event ) {
         $image = $(this).find('img');
