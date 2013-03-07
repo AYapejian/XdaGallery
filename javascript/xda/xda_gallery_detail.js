@@ -26,7 +26,7 @@ function XdaGalleryThread(){
     this.currentImageSet = [];
     this.isLoading = false;
     this.isLoadingAdditionalPages = false;
-    
+
     // HTML Elements
     this.$imageContainer = null;
     this.isMasonryInitialized = false;
@@ -112,7 +112,7 @@ XdaGalleryThread.prototype.renderImagesForTopic = function (topicId, pageNum) {
 
 XdaGalleryThread.prototype.renderImagesForTopic_Complete = function (data, pageNum) {
 	var that = this;
-	
+
     // Strip the html doc of script and style tags; and convert img src to data-src attribute
     data = this.cleanHtml(data);
 
@@ -156,9 +156,11 @@ XdaGalleryThread.prototype.renderImagesForTopic_Complete = function (data, pageN
             var html = this.generateHtml(this.currentImageSet);
             this.currentImageSet = [];
 
-            var $html = $(html);
+            // Hide the images so they don't appear before
+            // imagesLoaded known their ready, then we'll show
+            var $html = $(html).hide();
             this.$imageContainer.append($html);
-           
+
            this.watchImageProgress($html);
         }
     }
@@ -167,12 +169,14 @@ XdaGalleryThread.prototype.renderImagesForTopic_Complete = function (data, pageN
 XdaGalleryThread.prototype.watchImageProgress = function ($html) {
 	var that = this;
 	var $myHtml = $html;
-	
+
 	var dfd = this.$imageContainer.imagesLoaded({
 		callback: function($images, $proper, $broken){
-			
-			if(that.isMasonryInitialized){
-				console.log("Aligning images");
+            // Show the images now that their down loading
+            $myHtml.fadeIn();
+
+            if(that.isMasonryInitialized){
+                console.log("Aligning images");
 				that.$imageContainer.masonry('appended', $myHtml, true);
 			}else{
 				console.log("Initializing Alignment");
@@ -185,19 +189,19 @@ XdaGalleryThread.prototype.watchImageProgress = function ($html) {
 				});
 				that.isMasonryInitialized = true;
 			}
-			
+
 			console.log("Fully done with this batch. Properly loaded " + $proper.length + " of " + $images.length + " images. (" + $broken.length + " broken image(s))");
 		},
-		
+
 		progress: function (isBroken, $images, $proper, $broken) {
 			if(isBroken){
 				this.siblings(".image-broken").show();
 			}
 		}
 	});
-	
+
 	dfd.done(function($images){
-		
+
 	});
 };
 
@@ -212,7 +216,7 @@ XdaGalleryThread.prototype.generateHtml = function (images) {
         imageHtml += "<img src='" + images[x].src + "' ";
 
         // Need to force width and height since we don't know
-        // them yet 
+        // them yet
         // TODO: Change this and add logic in watchImageProgress()
         imageHtml += " />";
 
@@ -392,14 +396,14 @@ XdaGalleryThread.prototype.initGallery = function (xdaTopic) {
 // Set the mouseenter, exit and click handlers for images
 XdaGalleryThread.prototype.setupImageEventBindings = function () {
 	console.log("Binding events");
-	
+
 	this.$imageContainer.on('click', '.item', function( event ) {
-        $image = $(this).find('img'); 
-        
+        $image = $(this).find('img');
+
         if($image){
         	window.open($image.attr('src'),'_newtab');
         }
-        
+
     });
 
 	this.$imageContainer.on('mouseenter', '.item', function( event ) {
@@ -407,7 +411,7 @@ XdaGalleryThread.prototype.setupImageEventBindings = function () {
 	}).on('mouseleave', '.item', function( event ) {
 		$(this).removeClass('item-hover');
 	});
-	
+
 };
 
 // ************************************************************************************************
