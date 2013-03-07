@@ -3,6 +3,7 @@
 
 ##Description
 Now on the official Chrome Store: http://goo.gl/8LfZV
+And join the discussion on XDA: http://forum.xda-developers.com/showthread.php?t=2026417
 
 Chrome Extension to view XDA forum threads as an image gallery
 
