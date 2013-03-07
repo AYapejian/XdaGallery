@@ -158,7 +158,9 @@ XdaGalleryThread.prototype.renderImagesForTopic_Complete = function (data, pageN
             var html = this.generateHtml(this.currentImageSet);
             this.currentImageSet = [];
 
-            var $html = $(html);
+            // Hide the images so they don't appear before
+            // imagesLoaded known their ready, then we'll show
+            var $html = $(html).hide();
             this.$imageContainer.append($html);
 
            this.watchImageProgress($html);
@@ -173,7 +175,10 @@ XdaGalleryThread.prototype.watchImageProgress = function ($html) {
 	var dfd = this.$imageContainer.imagesLoaded({
 		callback: function($images, $proper, $broken){
 
-			if(that.isMasonryInitialized){
+            // Show the images now that their down loading
+            $myHtml.show();
+
+            if(that.isMasonryInitialized){
 				that.$imageContainer.masonry('appended', $myHtml, true);
 			}else{
 				that.$imageContainer.masonry({

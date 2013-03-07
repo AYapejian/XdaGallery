@@ -34,9 +34,9 @@ header h1{
 	position:				relative;
 	float: 					left;
 	width:					220px;
-	margin:					5px;	
+	margin:					5px;
 	padding: 				5px;
-	
+
 	background-color: 		#444444;
 }
 
@@ -51,7 +51,7 @@ header h1{
 	left:					0;
 	right:					0;
 	height:					20px;
-	
+
 	background:				rgba(0, 0, 0, 0.7);
 	text-align:				center;
 }
@@ -92,7 +92,8 @@ header h1{
 
 	padding:		5px;
 	margin:			10px;
-	border:			1px dashed black;
+	color:			white;
+	border:			1px dashed blue;
 }
 
 /** Info & Loader **/
