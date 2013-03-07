@@ -16,6 +16,7 @@ _gaq.push(['_trackPageview']);
 
 
 function XdaGalleryThread(){
+    this.loggingEnabled = false;
     this.debug = false;
     this.debugTopic = "http://forum.xda-developers.com/showthread.php?t=1416159";
 
@@ -372,22 +373,24 @@ XdaGalleryThread.prototype.trackEvent = function (category, action, label) {
  * @param  {[STRING]} severity ERROR, WARN, INFO, DEBUG or null ( null defaults to console.log)
  */
 XdaGalleryThread.prototype.log = function (message, severity) {
-    if(severity){
-        if(severity == "ERROR"){
-            console.error(message);
-        }else if(severity == "WARN"){
-            console.warn(message);
-        }else if(severity == "INFO"){
-            console.info(message);
-        }else if(severity == "DEBUG"){
-            if(this.debug){
-                console.debug(message);
+    if(this.loggingEnabled){
+        if(severity){
+            if(severity == "ERROR"){
+                console.error(message);
+            }else if(severity == "WARN"){
+                console.warn(message);
+            }else if(severity == "INFO"){
+                console.info(message);
+            }else if(severity == "DEBUG"){
+                if(this.debug){
+                    console.debug(message);
+                }
+            }else{
+                console.log(message);
             }
         }else{
             console.log(message);
         }
-    }else{
-        console.log(message);
     }
 };
 
@@ -477,6 +480,7 @@ var xdaGalleryThread = new XdaGalleryThread();
 
 $(document).ready(function(){
     xdaGalleryThread.debug = false;
+    xdaGalleryThread.loggingEnabled = false;
 
     // Debug - Thread with lots of images and pages
     xdaGalleryThread.debugTopic = "http://forum.xda-developers.com/showthread.php?t=1740482";
