@@ -153,8 +153,7 @@ XdaGalleryThread.prototype.renderImagesForTopic_Complete = function (data, pageN
                 this.showThreadEndIndicator(true);
             }
 
-            this.isLoadingAdditionalPages = false;
-            this.setLoadingIndicator(false);
+            
 
             var html = this.generateHtml(this.currentImageSet);
             this.currentImageSet = [];
@@ -192,6 +191,8 @@ XdaGalleryThread.prototype.watchImageProgress = function ($html) {
 				that.isMasonryInitialized = true;
 			}
 
+            that.isLoadingAdditionalPages = false;
+            that.setLoadingIndicator(false);
 			that.log("Fully done with this batch. Properly loaded " + $proper.length + " of " + $images.length + " images. (" + $broken.length + " broken image(s))", "DEBUG");
 		},
 
@@ -333,7 +334,7 @@ XdaGalleryThread.prototype.isValidImage = function (imageTag) {
 };
 
 XdaGalleryThread.prototype.onScroll = function (event) {
-    if(!this.isLoading){
+    if(!this.isLoading && !this.isLoadingAdditionalPages){
 
         var closeToBottom = ($(window).scrollTop() + $(window).height() > $(document).height() - 300);
 
