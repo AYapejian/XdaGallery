@@ -1,12 +1,12 @@
-#XdaGallery - Alpha Build
+#XdaGallery - Beta
 ==========
 
 ##Description
+Now on the official Chrome Store: http://goo.gl/8LfZV
+
 Chrome Extension to view XDA forum threads as an image gallery
 
-This only works, and button is only enabled, on XDA topic urls which follow the format:
-
-`http://forum.xda-developers.com/showthread.php?t=<SOME TOPIC ID>`
+This only works, and button is only enabled, on XDA topic urls which follow the format: `http://forum.xda-developers.com/showthread.php?t=<SOME TOPIC ID>`
 
 XDA threads seem to open with this format, almost always, when browsing the forum normally.  Sometimes if you arrive at a topic url via google, or it's a very old topic the url format will be different and that extension button will stay disabled, this is by design to eliminate any errors parsing the page for images.
 
@@ -15,11 +15,10 @@ XDA threads seem to open with this format, almost always, when browsing the foru
 Broswing either of these urls will give you an example of the expected format, and a working gallery page by clicking the extension button:
 
 (NOTE: Not responsible for the content in the posts, they were pretty much a random search to find them)
-```
-http://forum.xda-developers.com/showthread.php?t=1633561
 
-http://forum.xda-developers.com/showthread.php?t=1990251
-```
+* http://forum.xda-developers.com/showthread.php?t=1633561
+* http://forum.xda-developers.com/showthread.php?t=1990251
+
 
 ##Known Issues:
 
