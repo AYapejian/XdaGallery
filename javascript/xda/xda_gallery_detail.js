@@ -32,6 +32,8 @@ function XdaGalleryThread(){
 
     // HTML Elements
     this.$imageContainer = null;
+    this.$loadingBar = null;
+
     this.isMasonryInitialized = false;
 }
 
@@ -81,14 +83,11 @@ XdaGalleryThread.prototype.setLoadingIndicator = function (isLoading) {
     if(isLoading && !this.isLoadingAdditionalPages){
         this.isLoading = true;
 
-        var loaderDiv = $("#loaderIndicator");
-        loaderDiv.css("position", "absolute");
-        loaderDiv.css("top", Math.max(0, (($(window).height() - loaderDiv.outerHeight()) / 2) + $(window).scrollTop()) + "px");
-        loaderDiv.css("left", Math.max(0, (($(window).width() - loaderDiv.outerWidth()) / 2) +  $(window).scrollLeft()) + "px");
-        loaderDiv.show();
+        this.$loadingBar.slideDown(500);
+        
     }else if(!isLoading){
         this.isLoading = false;
-        $("#loaderIndicator").hide();
+        this.$loadingBar.slideUp(500);
     }
 };
 
@@ -99,6 +98,7 @@ XdaGalleryThread.prototype.setLoadingIndicator = function (isLoading) {
 // and next page had 15 images, 20 images will be loaded to ensure we get them all
 XdaGalleryThread.prototype.renderImagesForTopic = function (topicId, pageNum) {
     this.log("Fetching images for topic id " + topicId + " and page number " + pageNum, "INFO");
+    this.$loadingBar.html("Fetching images for thread page: " + pageNum);
 
     var url = this.currentXdaThread.url;
     url += "&page=" + pageNum;
@@ -445,6 +445,7 @@ XdaGalleryThread.prototype.initGallery = function (xdaTopic) {
     this.trackEvent("Gallery Tab Opened", xdaTopic.title, xdaTopic.url);
 
 	this.$imageContainer = $("#xdaGalleryContent");
+    this.$loadingBar = $("#loadingBar");
     this.setXdaTopic(xdaTopic);
     this.setupImageEventBindings();
 
