@@ -26,7 +26,7 @@ function XdaGalleryThread(){
     this.currentImageSet = [];
     this.isLoading = false;
     this.isLoadingAdditionalPages = false;
-    
+
     // HTML Elements
     this.$imageContainer = null;
     this.isMasonryInitialized = false;
@@ -42,11 +42,11 @@ XdaGalleryThread.prototype.setXdaTopic = function (xdaTopic) {
 };
 
 // Set the Gallery Detail header to contain relevant information
-XdaGalleryThread.prototype.setupGalleryHeader = function (xdaTopic) {
+XdaGalleryThread.prototype.setupGalleryHeader = function (myXdaTopic) {
 
-    var xdaTopic = xdaTopic || this.currentXdaThread;
+    var xdaTopic = myXdaTopic || this.currentXdaThread;
 
-    var html = "<a target='_blank' href='" + xdaTopic.url + "' >" + xdaTopic.title + "</a>";
+    var html = "<a target='_blank' href='" + xdaTopic.url + "' xdaTopicId='" + xdaTopic.topicId + "' >" + xdaTopic.title + "</a>";
     $("#topicName").html(html);
 };
 
@@ -112,7 +112,7 @@ XdaGalleryThread.prototype.renderImagesForTopic = function (topicId, pageNum) {
 
 XdaGalleryThread.prototype.renderImagesForTopic_Complete = function (data, pageNum) {
 	var that = this;
-	
+
     // Strip the html doc of script and style tags; and convert img src to data-src attribute
     data = this.cleanHtml(data);
 
@@ -158,7 +158,7 @@ XdaGalleryThread.prototype.renderImagesForTopic_Complete = function (data, pageN
 
             var $html = $(html);
             this.$imageContainer.append($html);
-           
+
            this.watchImageProgress($html);
         }
     }
@@ -167,37 +167,37 @@ XdaGalleryThread.prototype.renderImagesForTopic_Complete = function (data, pageN
 XdaGalleryThread.prototype.watchImageProgress = function ($html) {
 	var that = this;
 	var $myHtml = $html;
-	
+
 	var dfd = this.$imageContainer.imagesLoaded({
 		callback: function($images, $proper, $broken){
-			
+
 			if(that.isMasonryInitialized){
 				console.log("Aligning images");
 				that.$imageContainer.masonry('appended', $myHtml, true);
 			}else{
 				console.log("Initializing Alignment");
 				that.$imageContainer.masonry({
-					item: 			'.item',
+                    item:    '.item',
 					isFitWidth:		true,
 					columnWidth:	function( containerWidth ) {
-					    return containerWidth / 5;
+                        return containerWidth / 5;
 					}
 				});
 				that.isMasonryInitialized = true;
 			}
-			
+
 			console.log("Fully done with this batch. Properly loaded " + $proper.length + " of " + $images.length + " images. (" + $broken.length + " broken image(s))");
 		},
-		
+
 		progress: function (isBroken, $images, $proper, $broken) {
 			if(isBroken){
 				this.siblings(".image-broken").show();
 			}
 		}
 	});
-	
+
 	dfd.done(function($images){
-		
+
 	});
 };
 
@@ -212,13 +212,13 @@ XdaGalleryThread.prototype.generateHtml = function (images) {
         imageHtml += "<img src='" + images[x].src + "' ";
 
         // Need to force width and height since we don't know
-        // them yet 
+        // them yet
         // TODO: Change this and add logic in watchImageProgress()
         imageHtml += " />";
 
         imageHtml += "<div class='postInfo'>";
-        imageHtml += "  <a id='postLink' target='_blank' href='" + images[x].postLink + "'>View Post</a> -- ";
-        imageHtml += "  <a id='topicPageLink' target='_blank' href='" + this.currentXdaThread.url + "&page=" + images[x].topicPage + "'>Page " + images[x].topicPage + "</a>";
+        imageHtml += "  <a id='postLink' target='_newtab' href='" + images[x].postLink + "'>View Post</a> -- ";
+        imageHtml += "  <a id='topicPageLink' target='_newtab' href='" + this.currentXdaThread.url + "&page=" + images[x].topicPage + "'>Page " + images[x].topicPage + "</a>";
         imageHtml += "</div>";
         imageHtml += "<span class='image-loading'></span><span class='image-broken'>";
         imageHtml += "</li>";
@@ -376,7 +376,7 @@ XdaGalleryThread.prototype.fetchXdaTopicFromExtensionBackground = function () {
                     }
                 );
             }else{
-                that.displayError("Error finding the current XDA Gallery tab");
+                that.displayError("Error finding thread. If you are trying to refresh this page please close the tab and relaunch from the XDA Topic instead.");
             }
         }
     );
@@ -392,14 +392,14 @@ XdaGalleryThread.prototype.initGallery = function (xdaTopic) {
 // Set the mouseenter, exit and click handlers for images
 XdaGalleryThread.prototype.setupImageEventBindings = function () {
 	console.log("Binding events");
-	
+
 	this.$imageContainer.on('click', '.item', function( event ) {
-        $image = $(this).find('img'); 
-        
+        $image = $(this).find('img');
+
         if($image){
-        	window.open($image.attr('src'),'_newtab');
+            window.open($image.attr('src'),'_newtab');
         }
-        
+
     });
 
 	this.$imageContainer.on('mouseenter', '.item', function( event ) {
@@ -407,7 +407,7 @@ XdaGalleryThread.prototype.setupImageEventBindings = function () {
 	}).on('mouseleave', '.item', function( event ) {
 		$(this).removeClass('item-hover');
 	});
-	
+
 };
 
 // ************************************************************************************************
