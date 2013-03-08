@@ -27,6 +27,7 @@ function XdaGalleryThread(){
     this.numberOfBatchFetchRequest = 1;
     this.minImagesToLoad = 15;
     this.currentImageSet = [];
+    this.isColorBoxShowing = false;
     this.isLoading = false;
     this.isLoadingAdditionalPages = false;
 
@@ -82,12 +83,15 @@ XdaGalleryThread.prototype.setLoadingIndicator = function (isLoading) {
 
     if(isLoading && !this.isLoadingAdditionalPages){
         this.isLoading = true;
-
-        this.$loadingBar.slideDown(500);
+        if(this.$loadingBar){
+            this.$loadingBar.slideDown(500);
+        }
         
     }else if(!isLoading){
         this.isLoading = false;
-        this.$loadingBar.slideUp(500);
+        if(this.$loadingBar){
+            this.$loadingBar.slideUp(500);
+        }
     }
 };
 
@@ -153,8 +157,6 @@ XdaGalleryThread.prototype.renderImagesForTopic_Complete = function (data, pageN
                 this.showThreadEndIndicator(true);
             }
 
-            
-
             var html = this.generateHtml(this.currentImageSet);
             this.currentImageSet = [];
 
@@ -215,13 +217,7 @@ XdaGalleryThread.prototype.generateHtml = function (images) {
     var length = images.length;
     for(var x = 0; x < length; x++){
         var imageHtml = "<li class='item'>";
-
-        imageHtml += "<img src='" + images[x].src + "' ";
-
-        // Need to force width and height since we don't know
-        // them yet
-        // TODO: Change this and add logic in watchImageProgress()
-        imageHtml += " />";
+        imageHtml += "<img src='" + images[x].src + "' />";
 
         imageHtml += "<div class='postInfo'>";
         imageHtml += "  <a id='postLink' target='_newtab' href='" + images[x].postLink + "'>View Post</a> -- ";
@@ -334,7 +330,7 @@ XdaGalleryThread.prototype.isValidImage = function (imageTag) {
 };
 
 XdaGalleryThread.prototype.onScroll = function (event) {
-    if(!this.isLoading && !this.isLoadingAdditionalPages){
+    if(!this.isLoading && !this.isLoadingAdditionalPages && !this.isColorBoxShowing){
 
         var closeToBottom = ($(window).scrollTop() + $(window).height() > $(document).height() - 300);
 
@@ -447,24 +443,63 @@ XdaGalleryThread.prototype.initGallery = function (xdaTopic) {
 	this.$imageContainer = $("#xdaGalleryContent");
     this.$loadingBar = $("#loadingBar");
     this.setXdaTopic(xdaTopic);
+    this.setupGlobalEventBindings();
     this.setupImageEventBindings();
 
     this.log("*** Fetching new batch of images starting on page " + this.currentPage + "(Batch Request #" + this.numberOfBatchFetchRequest + ")", "INFO");
     this.renderImagesForTopic(this.currentXdaThread.topicId, this.currentPage);
 };
 
+XdaGalleryThread.prototype.setupGlobalEventBindings = function () {
+    var that = this;
+
+    // When Colorbox is opened set an indicator to pause the fetching of more images if open
+    $(document).bind('cbox_open', function(){
+        // This should effectivly disable scorlling, indicator is a fallback
+        $('html').css({overflow:'hidden'});
+        that.isColorBoxShowing = true;
+    });
+    
+    // When Colorbox is closed reset the indicator so scroll will function again
+    $(document).bind('cbox_closed', function(){
+        // This should effectivly re-enable scrolling
+        $('html').css({overflow:'auto'});
+        that.isColorBoxShowing = false;
+    });
+
+
+    // Fetch more images on scroll
+    $(document).bind('scroll', $.proxy(xdaGalleryThread.onScroll, xdaGalleryThread));
+
+    // Hide the debug/error messages on click
+    $("#debugInfo").bind('click', $.proxy(xdaGalleryThread.hideError, xdaGalleryThread));
+
+};
 // Set the mouseenter, exit and click handlers for images
 XdaGalleryThread.prototype.setupImageEventBindings = function () {
+    var that = this;
 
-	this.$imageContainer.on('click', '.item', function( event ) {
-        $image = $(this).find('img');
-
+    // Show colorbox of image on click
+    // TODO: Enable 'rel' parameter to allow forward/backward ability
+	this.$imageContainer.on('click', 'img', function( event ) {
+        var $image = $(this);
+        
         if($image){
-            window.open($image.attr('src'),'_newtab');
+            // TODO: Images posted as atachments aren't being fetched since they need to be 
+            // loaded into a DOM ( iFrame ) and not just as an image url.  Need to setup iFrame
+            var imageSrc = $image.attr('src');
+
+            $image.colorbox({
+                href: imageSrc,
+                fixed: true,
+                maxHeight: "100%",
+                scalePhotos: true
+            });
         }
 
     });
 
+    // Show/Hide hover info on each gallery item
 	this.$imageContainer.on('mouseenter', '.item', function( event ) {
 		$(this).addClass('item-hover');
 	}).on('mouseleave', '.item', function( event ) {
@@ -495,8 +530,4 @@ $(document).ready(function(){
         xdaGalleryThread.displayError("Testing Error");
         xdaGalleryThread.initGallery(xdaUtils.getTopicFromUrl(xdaGalleryThread.debugTopic));
     }
-
-     // Capture scroll event
-    $(document).bind('scroll', $.proxy(xdaGalleryThread.onScroll, xdaGalleryThread));
-    $("#debugInfo").bind('click', $.proxy(xdaGalleryThread.hideError, xdaGalleryThread));
 });
