@@ -175,6 +175,8 @@ XdaGalleryThread.prototype.watchImageProgress = function ($html) {
 
 	var dfd = this.$imageContainer.imagesLoaded({
 		progress: function (isBroken, $images, $proper, $broken) {
+            that.log("imagesLoaded 'Progress' Fired", "DEBUG");
+
 			if(isBroken){
                 this.parents('li').addClass("image-broken");
 				this.siblings(".image-broken").show();
@@ -182,7 +184,12 @@ XdaGalleryThread.prototype.watchImageProgress = function ($html) {
 		}
 	});
 
+    dfd.done(function(){
+        that.log("imagesLoaded 'Done' Fired", "DEBUG");
+    });
+
     dfd.always( function(){
+        that.log("imagesLoaded 'Always' Fired", "DEBUG");
         // Show the images now that their down loading
         $myHtml.show();
 
@@ -507,8 +514,8 @@ var xdaUtils = new XdaUtils();
 var xdaGalleryThread = new XdaGalleryThread();
 
 $(document).ready(function(){
-    xdaGalleryThread.debug = false;
-    xdaGalleryThread.loggingEnabled = false;
+    xdaGalleryThread.debug = true;
+    xdaGalleryThread.loggingEnabled = true;
 
     xdaGalleryThread.fetchXdaTopicFromExtensionBackground();
 });
