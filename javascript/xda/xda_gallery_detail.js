@@ -86,7 +86,7 @@ XdaGalleryThread.prototype.setLoadingIndicator = function (isLoading) {
         if(this.$loadingBar){
             this.$loadingBar.slideDown(500);
         }
-        
+
     }else if(!isLoading){
         this.isLoading = false;
         if(this.$loadingBar){
@@ -200,6 +200,7 @@ XdaGalleryThread.prototype.watchImageProgress = function ($html) {
 
 		progress: function (isBroken, $images, $proper, $broken) {
 			if(isBroken){
+                this.parents('li').addClass("image-broken");
 				this.siblings(".image-broken").show();
 			}
 		}
@@ -459,7 +460,7 @@ XdaGalleryThread.prototype.setupGlobalEventBindings = function () {
         $('html').css({overflow:'hidden'});
         that.isColorBoxShowing = true;
     });
-    
+
     // When Colorbox is closed reset the indicator so scroll will function again
     $(document).bind('cbox_closed', function(){
         // This should effectivly re-enable scrolling
@@ -483,20 +484,17 @@ XdaGalleryThread.prototype.setupImageEventBindings = function () {
     // TODO: Enable 'rel' parameter to allow forward/backward ability
 	this.$imageContainer.on('click', 'img', function( event ) {
         var $image = $(this);
-        
-        if($image){
-            // TODO: Images posted as atachments aren't being fetched since they need to be 
-            // loaded into a DOM ( iFrame ) and not just as an image url.  Need to setup iFrame
-            var imageSrc = $image.attr('src');
 
+        if($image){
             $image.colorbox({
-                href: imageSrc,
+                photo: true,
+                href: $image.attr('src'),
                 fixed: true,
                 maxHeight: "100%",
-                scalePhotos: true
+                scalePhotos: true,
+                scrolling: false
             });
         }
-
     });
 
     // Show/Hide hover info on each gallery item

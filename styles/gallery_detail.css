@@ -77,9 +77,17 @@ header h1{
 	background-color:		orange;
 }
 
+li.image-broken, li.image-broken img{
+	height:					125px !important;
+}
+
 .item .image-broken{
 	display:				none;
-	background-color:		red;
+	background-color:		rgb(117, 117, 117);
+
+	background-image: 		url('/images/image-not-found.png');
+	background-repeat: 		no-repeat;
+	background-position:	center;
 }
 
 /** Thread end indicator **/
@@ -103,10 +111,10 @@ header h1{
 	z-index:			100;
 	top:				0;
 	width: 				30%;
-	height:				30px;
+	height:				20px;
 
 	margin:				0 35%;
-	padding:			5px 10px 5px 10px;
+	padding:			10px;
 
     color: 				white;
     font-size: 			1.1em;
