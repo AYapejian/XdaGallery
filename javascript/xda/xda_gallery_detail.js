@@ -18,7 +18,6 @@ _gaq.push(['_trackPageview']);
 function XdaGalleryThread(){
     this.loggingEnabled = false;
     this.debug = false;
-    this.debugTopic = "http://forum.xda-developers.com/showthread.php?t=1416159";
 
     this.currentXdaThread = null;
     this.currentPage = 1;
@@ -175,29 +174,6 @@ XdaGalleryThread.prototype.watchImageProgress = function ($html) {
 	var $myHtml = $html;
 
 	var dfd = this.$imageContainer.imagesLoaded({
-		callback: function($images, $proper, $broken){
-
-            // Show the images now that their down loading
-            $myHtml.show();
-
-            if(that.isMasonryInitialized){
-				that.$imageContainer.masonry('appended', $myHtml, true);
-			}else{
-				that.$imageContainer.masonry({
-                    item:    '.item',
-					isFitWidth:		true,
-					columnWidth:	function( containerWidth ) {
-                        return containerWidth / 5;
-					}
-				});
-				that.isMasonryInitialized = true;
-			}
-
-            that.isLoadingAdditionalPages = false;
-            that.setLoadingIndicator(false);
-			that.log("Fully done with this batch. Properly loaded " + $proper.length + " of " + $images.length + " images. (" + $broken.length + " broken image(s))", "DEBUG");
-		},
-
 		progress: function (isBroken, $images, $proper, $broken) {
 			if(isBroken){
                 this.parents('li').addClass("image-broken");
@@ -206,9 +182,26 @@ XdaGalleryThread.prototype.watchImageProgress = function ($html) {
 		}
 	});
 
-	dfd.done(function($images){
+    dfd.always( function(){
+        // Show the images now that their down loading
+        $myHtml.show();
 
-	});
+        if(that.isMasonryInitialized){
+            that.$imageContainer.masonry('appended', $myHtml, true);
+        }else{
+            that.$imageContainer.masonry({
+                item:    '.item',
+                isFitWidth:     true,
+                columnWidth:    function( containerWidth ) {
+                    return containerWidth / 5;
+                }
+            });
+            that.isMasonryInitialized = true;
+        }
+
+        that.isLoadingAdditionalPages = false;
+        that.setLoadingIndicator(false);
+    });
 };
 
 
@@ -517,15 +510,5 @@ $(document).ready(function(){
     xdaGalleryThread.debug = false;
     xdaGalleryThread.loggingEnabled = false;
 
-    // Debug - Thread with lots of images and pages
-    xdaGalleryThread.debugTopic = "http://forum.xda-developers.com/showthread.php?t=1740482";
-
-    // If we're debugging fetch and load the xdaTopic from the background js from
-    // extension, otherwise load a test page
-    if(!xdaGalleryThread.debug){
-        xdaGalleryThread.fetchXdaTopicFromExtensionBackground();
-    }else{
-        xdaGalleryThread.displayError("Testing Error");
-        xdaGalleryThread.initGallery(xdaUtils.getTopicFromUrl(xdaGalleryThread.debugTopic));
-    }
+    xdaGalleryThread.fetchXdaTopicFromExtensionBackground();
 });
