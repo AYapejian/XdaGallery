@@ -4,8 +4,8 @@
     	"description": "Chrome extension name."
   	},
   	"extDescription": {
-    	"message": "View all images in XDA threads. This is a beta improvements and fixes coming in the future.",
+    	"message": "View XDA threads as an image gallery",
     	"description": "Chrome extension description."
   	}
 }
-  
+

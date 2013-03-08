@@ -1,9 +1,13 @@
 {
-  "name": "__MSG_extName__",
-  "version": "0.2.2",
+  "name": "XDA Gallery - Beta",
+  "version": "0.2.3.1",
   "manifest_version": 2,
-  "description": "__MSG_extDescription__",
+  "description": "View XDA threads as an image gallery",
   "default_locale": "en",
+
+  "icons": {
+    "128": "images/xda_pic_viewer_on_128.png"
+  },
 
   "browser_action": {
     "default_icon": "images/icon.png"
