@@ -156,7 +156,7 @@ XdaGalleryThread.prototype.renderImagesForTopic_Complete = function (data, pageN
     // Logic to keep fetching pages until minimum number of
     // images are loaded or we've hit last page
     if(this.currentImageSet.length < this.minImagesToLoad && this.currentPage < this.currentXdaThread.lastPage){
-        that.log("Currently fetched " + this.currentImageSet.length + " images; looking for more on next page.", "DEBUG");
+        that.log("Currently fetched " + this.currentImageSet.length + " images( Minimum to fetch set to " + that.minImagesToLoad + " ). Looking for more on next page.", "DEBUG");
 
         this.nextPage();
 
@@ -195,21 +195,15 @@ XdaGalleryThread.prototype.watchImageProgress = function ($html) {
 
 	var dfd = this.$imageContainer.imagesLoaded({
 		progress: function (isBroken, $images, $proper, $broken) {
-            that.log("imagesLoaded 'Progress' Fired", "DEBUG");
-
 			if(isBroken){
-                this.parents('li').addClass("image-broken");
-				this.siblings(".image-broken").show();
+                this.parents('li').addClass('image-broken');
+                this.removeClass('xdaGalleryImage');
+				this.siblings('.image-broken').show();
 			}
 		}
 	});
 
-    dfd.done(function(){
-        that.log("imagesLoaded 'Done' Fired", "DEBUG");
-    });
-
-    dfd.always( function(){
-        that.log("imagesLoaded 'Always' Fired", "DEBUG");
+    dfd.always(function(){
         // Show the images now that their down loading
         $myHtml.show();
 
@@ -226,6 +220,25 @@ XdaGalleryThread.prototype.watchImageProgress = function ($html) {
             that.isMasonryInitialized = true;
         }
 
+        // Reinitialize colorbox
+        $(".xdaGalleryImage").colorbox({
+            rel: 'xdaGalleryImage',
+            photo: true,
+            href: function(){
+                return $(this).attr('src');
+            },
+            fixed: true,
+            maxHeight: "100%",
+            scalePhotos: true,
+            scrolling: false,
+            onOpen: function(){
+                // Track open image event
+                var imageSrc = $(this).attr('src');
+                if(!imageSrc){ imageSrc = "Unknown"; }
+                that.trackEvent("View Image", "Colorbox", imageSrc);
+            }
+        });
+
         that.isLoadingAdditionalPages = false;
         that.setLoadingIndicator(false);
     });
@@ -238,7 +251,7 @@ XdaGalleryThread.prototype.generateHtml = function (images) {
     var length = images.length;
     for(var x = 0; x < length; x++){
         var imageHtml = "<li class='item'>";
-        imageHtml += "<img src='" + images[x].src + "' />";
+        imageHtml += "<img class='xdaGalleryImage' src='" + images[x].src + "' />";
 
         imageHtml += "<div class='postInfo'>";
         imageHtml += "  <a id='postLink' target='_newtab' href='" + images[x].postLink + "'>View Post</a> -- ";
@@ -362,7 +375,7 @@ XdaGalleryThread.prototype.onScroll = function (event) {
             if(currentXdaThread){
                 if(this.currentPage < this.currentXdaThread.lastPage){
                     var topicName = currentXdaThread.title || "XDA Thread Unknown";
-                    this.log("*** Fetching new batch of images starting on page " + this.currentPage + 1 + " (Batch Request #" + (this.numberOfBatchFetchRequest + 1) + ")", "INFO");
+                    this.log("*** Fetching new batch of images starting on page " + this.currentPage + 1 + "  ( Batch Request #" + (this.numberOfBatchFetchRequest + 1) + " )", "INFO");
                     this.trackEvent("Fetch Images", "Number of requests this session: " + this.numberOfBatchFetchRequest++);
                     this.nextPage();
                 }
@@ -372,19 +385,15 @@ XdaGalleryThread.prototype.onScroll = function (event) {
 };
 
 XdaGalleryThread.prototype.trackEvent = function (category, action, label) {
-    if(!this.debug){
         if(category && action){
             if(label){
-                this.log("Tracking Event: Category: " + category + "; Action: " + action + "; Label: " + label, "DEBUG");
                 _gaq.push(['_trackEvent', category, action, label]);
             }else{
-                this.log("Tracking Event: Category: " + category + "; Action: " + action, "DEBUG");
                 _gaq.push(['_trackEvent', category, action]);
             }
         }else{
             this.log("Can't track event. Category or action is null", "ERROR");
         }
-    }
 };
 
 /**
@@ -501,23 +510,6 @@ XdaGalleryThread.prototype.setupGlobalEventBindings = function () {
 // Set the mouseenter, exit and click handlers for images
 XdaGalleryThread.prototype.setupImageEventBindings = function () {
     var that = this;
-
-    // Show colorbox of image on click
-    // TODO: Enable 'rel' parameter to allow forward/backward ability
-	this.$imageContainer.on('click', 'img', function( event ) {
-        var $image = $(this);
-
-        if($image){
-            $image.colorbox({
-                photo: true,
-                href: $image.attr('src'),
-                fixed: true,
-                maxHeight: "100%",
-                scalePhotos: true,
-                scrolling: false
-            });
-        }
-    });
 
     // Show/Hide hover info on each gallery item
 	this.$imageContainer.on('mouseenter', '.item', function( event ) {
