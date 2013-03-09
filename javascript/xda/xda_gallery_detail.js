@@ -1,7 +1,9 @@
 /*
  * Author: Ara Yapejian
- * Credits: Credit to imageLoaded plugin for gallery detail page
- *      ImagesLoaded: https://github.com/desandro/imagesloaded
+ * Credits:
+ *      ImagesLoaded: For detecting when fetched images are done loading
+ *      Masonry: For great gallery image layout
+ *      Colorbox: Displaying images in lightbox
  */
 var _gaq = _gaq || [];
 _gaq.push(['_setAccount', 'UA-36762911-1']);
@@ -15,7 +17,9 @@ _gaq.push(['_trackPageview']);
 
 
 
-function XdaGalleryThread(){
+function XdaGalleryThread(callback){
+    var that = this;
+
     this.loggingEnabled = false;
     this.debug = false;
 
@@ -35,6 +39,22 @@ function XdaGalleryThread(){
     this.$loadingBar = null;
 
     this.isMasonryInitialized = false;
+
+    chrome.storage.sync.get("options", function(items){
+        var options = items.options;
+        if(options){
+            that.debug = options['debugMode'].value;
+            that.loggingEnabled = options['debugMode'].value;
+
+            var imagesToFetch = options['imagesToFetch'].value;
+            if( imagesToFetch >= 10 && imagesToFetch <= 50){
+                that.minImagesToLoad = imagesToFetch;
+            }
+        }
+
+        callback();
+    });
+    // TODO: Fetch options from chrome.storage.sync.get('options',callback) and
 }
 
 
@@ -352,16 +372,18 @@ XdaGalleryThread.prototype.onScroll = function (event) {
 };
 
 XdaGalleryThread.prototype.trackEvent = function (category, action, label) {
-    if(category && action){
-        if(label){
-            this.log("Tracking Event: Category: " + category + "; Action: " + action + "; Label: " + label, "DEBUG");
-            _gaq.push(['_trackEvent', category, action, label]);
+    if(!this.debug){
+        if(category && action){
+            if(label){
+                this.log("Tracking Event: Category: " + category + "; Action: " + action + "; Label: " + label, "DEBUG");
+                _gaq.push(['_trackEvent', category, action, label]);
+            }else{
+                this.log("Tracking Event: Category: " + category + "; Action: " + action, "DEBUG");
+                _gaq.push(['_trackEvent', category, action]);
+            }
         }else{
-            this.log("Tracking Event: Category: " + category + "; Action: " + action, "DEBUG");
-            _gaq.push(['_trackEvent', category, action]);
+            this.log("Can't track event. Category or action is null", "ERROR");
         }
-    }else{
-        this.log("Can't track event. Category or action is null", "ERROR");
     }
 };
 
@@ -470,10 +492,10 @@ XdaGalleryThread.prototype.setupGlobalEventBindings = function () {
 
 
     // Fetch more images on scroll
-    $(document).bind('scroll', $.proxy(xdaGalleryThread.onScroll, xdaGalleryThread));
+    $(document).bind('scroll', $.proxy(that.onScroll, that));
 
     // Hide the debug/error messages on click
-    $("#debugInfo").bind('click', $.proxy(xdaGalleryThread.hideError, xdaGalleryThread));
+    $("#debugInfo").bind('click', $.proxy(that.hideError, that));
 
 };
 // Set the mouseenter, exit and click handlers for images
@@ -511,11 +533,9 @@ XdaGalleryThread.prototype.setupImageEventBindings = function () {
 // opened this gallery detail tab.
 // ************************************************************************************************
 var xdaUtils = new XdaUtils();
-var xdaGalleryThread = new XdaGalleryThread();
 
 $(document).ready(function(){
-    xdaGalleryThread.debug = true;
-    xdaGalleryThread.loggingEnabled = true;
-
-    xdaGalleryThread.fetchXdaTopicFromExtensionBackground();
+    var xdaGalleryThread = new XdaGalleryThread(function(){
+        xdaGalleryThread.fetchXdaTopicFromExtensionBackground();
+    });
 });

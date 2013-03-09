@@ -1,6 +1,6 @@
 {
   "name": "XDA Gallery - Beta",
-  "version": "0.2.3.1",
+  "version": "0.2.4",
   "manifest_version": 2,
   "description": "View XDA threads as an image gallery",
   "default_locale": "en",
@@ -14,9 +14,11 @@
   },
 
   "background": { "page": "views/background.html" },
+  "options_page": "views/options.html",
 
   "permissions": [
-    "tabs", "http://forum.xda-developers.com/*"
+    "tabs", "http://forum.xda-developers.com/*",
+    "storage"
   ],
 
   "content_security_policy": "script-src 'self' https://ssl.google-analytics.com; object-src 'self'",

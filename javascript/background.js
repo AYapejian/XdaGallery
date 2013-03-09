@@ -1,6 +1,4 @@
 var _gaq = _gaq || [];
-_gaq.push(['_setAccount', 'UA-36762911-1']);
-_gaq.push(['_trackPageview']);
 
 (function() {
   var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
@@ -72,7 +70,7 @@ chrome.tabs.onActivated.addListener(
 );
 
 function checkIfTabIsValidTopic(url){
-	if(url != null){
+	if(url !== null){
 		if(xdaUtils.isValidTopicUrl(url)){
 			validTopicTab = true;
 			chrome.browserAction.setIcon({path: "/images/icon.png"});

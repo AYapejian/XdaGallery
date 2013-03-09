@@ -1,0 +1,72 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Xda Gallery Options</title>
+
+    <link rel="stylesheet" href="../styles/options.css">
+
+    <script src="../javascript/jquery.js"></script>
+  </head>
+  <body>
+    <div id="navigation" data-width="155" class="changing-content">
+      <h1>Xda Gallery</h1>
+      <ul>
+        <li controls="general" class="selected">
+          <button class="custom-appearance">General</button>
+        </li>
+      </ul>
+    </div>
+
+    <div class="page" id="extension-settings">
+      <header id="page-header">
+        <h1>General Settings</h1>
+      </header>
+
+      <!-- Number of Images to fetch per request -->
+      <div id="extension-settings-list">
+        <div id="imagesToFetchSettingsSection" class="settings-section">
+
+          <div class="setting-name-and-description">
+            <h3>Number of images to fetch per request: <span class='setting-name-value'>15</span></h3>
+            <span class="setting-description">
+              Will continue fetching images until finding this amount, loading one pages worth at a minumum.
+            </span>
+          </div>
+
+          <div class="setting-options">
+            <input id="imagesToFetchInput" type="range" min="10" max="50" step="5" value="15">
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Debug toggle -->
+       <div id="extension-settings-list">
+        <div id="debugModeSettingSection" class="settings-section">
+
+          <div class="setting-name-and-description">
+            <h3>Debug Mode: <span class='setting-name-value'>Off</span></h3>
+            <span class="setting-description">
+              Enabling will turn on Chrome's console logging, should only be enabled to troubleshoot issues.
+            </span>
+          </div>
+
+          <div class="setting-options">
+            <div class="checkbox">
+              <label>
+                <input id="debugModeInput" type="checkbox">
+                    <span class="enabled-text">Enabled</span>
+                    <span class="disabled-text">Disabled</span>
+                </input>
+              </label>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div><!-- End of Settings List -->
+
+    <script src="../javascript/options.js"></script>
+  </body>
+</html>
