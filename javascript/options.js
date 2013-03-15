@@ -39,7 +39,7 @@ ExtensionOptions.prototype.storeOptions = function(options){
 	if(options){
 		// Save the settings object
 		chrome.storage.sync.set({"options": options}, function(){
-
+			// Nothing to do here
 		});
 	}
 };
@@ -55,7 +55,7 @@ ExtensionOptions.prototype.getOptions = function(callback){
 
 ExtensionOptions.prototype.setDebug = function(enabled){
 
-	if(enabled){
+	if(enabled === true){
 		this.options.debugMode.settingNameValue.html("On");
 		this.options.debugMode.value = true;
 	}else{
@@ -71,6 +71,9 @@ ExtensionOptions.prototype.setDebug = function(enabled){
 
 ExtensionOptions.prototype.setImagesToFetch = function(value){
 
+	if(isNaN(value)){
+		value = this.options.imagesToFetch.defaultValue;
+	}
 	// There is a bug with this in Chrome that causes the slider to jump around
 	// but the correct value is set.
 	// TODO: Test in stable chrome version and use if it's good, otherwise
@@ -147,9 +150,12 @@ ExtensionOptions.prototype.loadSettings = function(callback){
 $(function(){
 	var extensionOptions = new ExtensionOptions();
 
-	extensionOptions.init();
-
+	// For testing setting defaults	
 	if(false){
-		chrome.storage.sync.clear();
+		chrome.storage.sync.clear(function(){
+			extensionOptions.init();		
+		});
 	}
+
+	extensionOptions.init();
 });
