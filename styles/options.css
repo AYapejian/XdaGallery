@@ -113,6 +113,7 @@ button {
 
 .settings-section{
   width:                775px;
+  margin-bottom:        25px;
   display:              -webkit-box;
 }
 

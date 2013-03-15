@@ -54,7 +54,6 @@ function XdaGalleryThread(callback){
 
         callback();
     });
-    // TODO: Fetch options from chrome.storage.sync.get('options',callback) and
 }
 
 
