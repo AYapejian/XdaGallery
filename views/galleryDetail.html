@@ -3,7 +3,7 @@
   <head>
     <title>XDA Topic Gallery</title>
 
-  
+
 	<link rel="stylesheet" href="../styles/reset.css">
 	<link rel="stylesheet" href="../styles/styles.css">
 	<link rel="stylesheet" href="../styles/gallery_detail.css">
@@ -19,7 +19,13 @@
   </head>
   <body>
   	<div id="container">
-      <div id="loadingBar">Fetching Images on page </div>
+      <div id="loadingBar">
+          <span id="currentPageFetchInfo">Fetching Images on page </span>
+          <div id="overrideNumImageFetchWarning">
+            <p class="warning">Fetching all images in thread, this may take while...</p>
+          </div>
+      </div>
+
   		<div id="debugInfo">
   			<div id="debugDetails"><span></span></div>
   		</div>

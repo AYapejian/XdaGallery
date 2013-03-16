@@ -125,6 +125,14 @@ li.image-broken, li.image-broken img{
 	-webkit-border-bottom-right-radius:	15px;
 }
 
+#overrideNumImageFetchWarning {
+	display:			none;
+}
+
+#loadingBar .warning {
+	color:				red;
+}
+
 #debugInfo{
 	display:			none;
 	position:			absolute;

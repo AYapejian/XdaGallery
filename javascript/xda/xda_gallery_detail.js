@@ -20,6 +20,8 @@ _gaq.push(['_trackPageview']);
 function XdaGalleryThread(callback){
     var that = this;
 
+    this.overrideNumImageFetch = false;
+
     this.loggingEnabled = false;
     this.debug = false;
 
@@ -45,10 +47,19 @@ function XdaGalleryThread(callback){
         if(options){
             that.debug = options['debugMode'].value;
             that.loggingEnabled = options['debugMode'].value;
+            that.overrideNumImageFetch = options['overrideNumImageFetch'].value;
 
-            var imagesToFetch = options['imagesToFetch'].value;
-            if( imagesToFetch >= 10 && imagesToFetch <= 50){
-                that.minImagesToLoad = imagesToFetch;
+            // Being real lazy!
+            // If overrideNumImageFetch is set to true, then set imagesToFetch
+            // to a ridiculous number we wont reach
+            if(that.overrideNumImageFetch === true){
+                that.log("Warning: Overriding number of images to fetch and grabbing all of them, this may take awhile...", "WARN");
+                that.minImagesToLoad = 999999;
+            }else{
+                var imagesToFetch = options['imagesToFetch'].value;
+                if( imagesToFetch >= 10){
+                    that.minImagesToLoad = imagesToFetch;
+                }
             }
         }
 
@@ -102,6 +113,16 @@ XdaGalleryThread.prototype.setLoadingIndicator = function (isLoading) {
     if(isLoading && !this.isLoadingAdditionalPages){
         this.isLoading = true;
         if(this.$loadingBar){
+            if(this.overrideNumImageFetch === true){
+                this.$loadingBar.find("#overrideNumImageFetchWarning").show();
+                // One more 'lazy' move
+                this.$loadingBar.height('45px');
+            }else{
+                this.$loadingBar.find("#overrideNumImageFetchWarning").hide();
+                // One more 'lazy' move
+                this.$loadingBar.height('20px');
+            }
+
             this.$loadingBar.slideDown(500);
         }
 
@@ -120,7 +141,7 @@ XdaGalleryThread.prototype.setLoadingIndicator = function (isLoading) {
 // and next page had 15 images, 20 images will be loaded to ensure we get them all
 XdaGalleryThread.prototype.renderImagesForTopic = function (topicId, pageNum) {
     this.log("Fetching images for topic id " + topicId + " and page number " + pageNum, "INFO");
-    this.$loadingBar.html("Fetching images for thread page: " + pageNum);
+    this.$loadingBar.find("#currentPageFetchInfo").html("Fetching images for thread page: " + pageNum);
 
     var url = this.currentXdaThread.url;
     url += "&page=" + pageNum;

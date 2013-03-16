@@ -13,6 +13,8 @@ _gaq.push(['_trackPageview']);
 })();
 
 function ExtensionOptions() {
+	this.navigation = {};
+
 	this.options = {
 		imagesToFetch: {
 			name: 'imagesToFetch',
@@ -23,6 +25,13 @@ function ExtensionOptions() {
 		},
 		debugMode: {
 			name: 'debugMode',
+			value: {},
+			defaultValue: false,
+			control: {},
+			settingNameValue: {}
+		},
+		overrideNumImageFetch: {
+			name: 'overrideNumImageFetch',
 			value: {},
 			defaultValue: false,
 			control: {},
@@ -69,26 +78,56 @@ ExtensionOptions.prototype.setDebug = function(enabled){
 	this.storeOptions(this.options);
 };
 
-ExtensionOptions.prototype.setImagesToFetch = function(value){
+ExtensionOptions.prototype.setOverrideImagesToFetch= function(enabled){
 
-	if(isNaN(value)){
-		value = this.options.imagesToFetch.defaultValue;
+	if(enabled === true){
+		this.options.overrideNumImageFetch.settingNameValue.html("On");
+		this.options.overrideNumImageFetch.value = true;
+		this.setImagesToFetch("numImageFetchOverride");
+	}else{
+		this.options.overrideNumImageFetch.settingNameValue.html("Off");
+		this.options.overrideNumImageFetch.value = false;
+		this.setImagesToFetch(this.options.imagesToFetch.value);
 	}
-	// There is a bug with this in Chrome that causes the slider to jump around
-	// but the correct value is set.
-	// TODO: Test in stable chrome version and use if it's good, otherwise
-	// put in checkbox group
-	this.options.imagesToFetch.control.val(parseInt(value, 10));
 
-	this.options.imagesToFetch.value = value;
-	this.options.imagesToFetch.settingNameValue.html(value);
+	// Set the input element if it's not set
+	this.options.overrideNumImageFetch.control.prop('checked', this.options.overrideNumImageFetch.value);
 
 	this.storeOptions(this.options);
+};
+
+ExtensionOptions.prototype.setImagesToFetch = function(value){
+
+	// numImageFetchOverride is on, disable this option
+	if(value == "numImageFetchOverride"){
+		this.options.imagesToFetch.control.prop('disabled', true);
+		this.options.imagesToFetch.settingNameValue.addClass("warning");
+		this.options.imagesToFetch.settingNameValue.html("Fetch all images override");
+	}else{
+		if(isNaN(value)){
+			value = this.options.imagesToFetch.defaultValue;
+		}
+
+		this.options.imagesToFetch.settingNameValue.removeClass("warning");
+		this.options.imagesToFetch.control.prop('disabled', false);
+		// There is a bug with this in Chrome that causes the slider to jump around
+		// but the correct value is set.
+		// TODO: Test in stable chrome version and use if it's good, otherwise
+		// put in checkbox group
+		this.options.imagesToFetch.control.val(parseInt(value, 10));
+
+		this.options.imagesToFetch.value = value;
+		this.options.imagesToFetch.settingNameValue.html(value);
+
+		this.storeOptions(this.options);
+	}
 };
 
 ExtensionOptions.prototype.init = function(){
 	var that = this;
 	var options = that.options;
+
+	that.navigation = $("#navigation");
 
 	// First fetch all the controls and html elements
 	options.imagesToFetch.control = $("#imagesToFetchInput");
@@ -97,13 +136,29 @@ ExtensionOptions.prototype.init = function(){
 	options.debugMode.control = $("#debugModeInput");
 	options.debugMode.settingNameValue = $("#debugModeSettingSection .setting-name-value");
 
+	options.overrideNumImageFetch.control = $("#overrideNumImageFetchInput");
+	options.overrideNumImageFetch.settingNameValue = $("#overrideNumImageFetchSettingSection .setting-name-value");
+
 	// Load the settings from storage, when done set the UI up
 	that.loadSettings(function(){
 		that.setDebug(options.debugMode.value);
 		that.setImagesToFetch(options.imagesToFetch.value);
+		that.setOverrideImagesToFetch(options.overrideNumImageFetch.value);
 	});
 
-	// Setup events
+	this.setupEventBinding();
+};
+
+ExtensionOptions.prototype.setupEventBinding = function(){
+	var that = this;
+	var options = that.options;
+
+	// Setup page navigation events
+	this.navigation.on('click', 'li', function(){
+		that.showSettingsPage(this.attributes.getNamedItem('controls').value);
+	});
+
+	// Setup Option Control Events
 	// Number of images to fetch
 	options.imagesToFetch.control.change(function(){
 		that.setImagesToFetch(this.value);
@@ -113,8 +168,29 @@ ExtensionOptions.prototype.init = function(){
 	options.debugMode.control.click(function(){
 		that.setDebug(this.checked);
 	});
+
+	// Debug Mode
+	options.overrideNumImageFetch.control.click(function(){
+		that.setOverrideImagesToFetch(this.checked);
+	});
 };
 
+ExtensionOptions.prototype.showSettingsPage = function(controlsAttribute){
+	// Being lazy
+	if(controlsAttribute == "general"){
+		$("#general").addClass("pageSelected");
+		$("#advanced").removeClass("pageSelected");
+
+		$("#navGeneral").addClass("selected");
+		$("#navAdvanced").removeClass("selected");
+	}else if (controlsAttribute == "advanced"){
+		$("#advanced").addClass("pageSelected");
+		$("#general").removeClass("pageSelected");
+
+		$("#navAdvanced").addClass("selected");
+		$("#navGeneral").removeClass("selected");
+	}
+};
 
 /**
  * Fetches and sets the option value's of this instance of the class, or sets
@@ -140,6 +216,13 @@ ExtensionOptions.prototype.loadSettings = function(callback){
 			} else {
 				options.imagesToFetch.value = options.imagesToFetch.defaultValue;
 			}
+
+			// Get the Override Image Fetch Number option
+			if(fetchedOptions[options.overrideNumImageFetch.name]){
+				options.overrideNumImageFetch.value = fetchedOptions[options.overrideNumImageFetch.name].value;
+			} else {
+				options.overrideNumImageFetch.value = options.overrideNumImageFetch.defaultValue;
+			}
 		}
 
 		callback();
@@ -150,12 +233,12 @@ ExtensionOptions.prototype.loadSettings = function(callback){
 $(function(){
 	var extensionOptions = new ExtensionOptions();
 
-	// For testing setting defaults	
+	// For testing setting defaults
 	if(false){
 		chrome.storage.sync.clear(function(){
-			extensionOptions.init();		
+			extensionOptions.init();
 		});
+	}else{
+		extensionOptions.init();
 	}
-
-	extensionOptions.init();
 });
