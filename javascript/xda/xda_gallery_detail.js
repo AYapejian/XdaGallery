@@ -405,6 +405,11 @@ XdaGalleryThread.prototype.onScroll = function (event) {
 };
 
 XdaGalleryThread.prototype.trackEvent = function (category, action, label) {
+        // If Debug mode is on prepend "DEBUG" to category to allow filtering in Google Analytics
+        if(category && this.debug === true){
+            category = "DEBUG - " + category;
+        }
+
         if(category && action){
             if(label){
                 _gaq.push(['_trackEvent', category, action, label]);

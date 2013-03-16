@@ -1,6 +1,6 @@
 {
   "name": "XDA Gallery - Beta",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "manifest_version": 2,
   "description": "View XDA threads as an image gallery",
   "default_locale": "en",
