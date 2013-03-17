@@ -45,9 +45,13 @@ function XdaGalleryThread(callback){
     chrome.storage.sync.get("options", function(items){
         var options = items.options;
         if(options){
-            that.debug = options['debugMode'].value;
-            that.loggingEnabled = options['debugMode'].value;
-            that.overrideNumImageFetch = options['overrideNumImageFetch'].value;
+            if(options['debugMode']){
+                that.debug = options['debugMode'].value;
+                that.loggingEnabled = options['debugMode'].value;
+            }
+            if(options['overrideNumImageFetch'])
+                that.overrideNumImageFetch = options['overrideNumImageFetch'].value;
+            }
 
             // Being real lazy!
             // If overrideNumImageFetch is set to true, then set imagesToFetch
